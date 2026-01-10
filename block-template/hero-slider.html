@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero Slider</title>
+    
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Hero Slider Wrapper */
+        .hero-slider-section {
+            position: relative;
+            width: 100%;
+            min-height: 966px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Swiper Container */
+        .hero-swiper {
+            width: 100%;
+            height: 100%;
+        }
+
+        .swiper-slide {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Video Slide */
+        .hero-slide-video {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        /* Image Slide */
+        .hero-slide-image {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Overlay */
+        .hero-slide-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        /* Slide Content */
+        .hero-slide-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            padding: 20px;
+        }
+
+        .hero-slide-content .container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            line-height: 1.2;
+        }
+
+        .hero-description {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            line-height: 1.6;
+        }
+
+        .hero-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-button:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        /* Swiper Navigation */
+        .swiper-button-prev,
+        .swiper-button-next {
+            color: #fff;
+            width: 50px;
+            height: 50px;
+        }
+
+        .swiper-button-prev:after,
+        .swiper-button-next:after {
+            font-size: 30px;
+        }
+
+        /* Swiper Pagination */
+        .swiper-pagination-bullet {
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            opacity: 0.5;
+        }
+
+        .swiper-pagination-bullet-active {
+            opacity: 1;
+            background: #fff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-slider-section {
+                min-height: 600px;
+            }
+
+            .hero-title {
+                margin-bottom: 15px;
+            }
+
+            .hero-description {
+                margin-bottom: 20px;
+            }
+
+            .hero-button {
+                padding: 12px 30px;
+                font-size: 0.9rem;
+            }
+
+            .swiper-button-prev,
+            .swiper-button-next {
+                width: 40px;
+                height: 40px;
+            }
+
+            .swiper-button-prev:after,
+            .swiper-button-next:after {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-slider-section {
+                min-height: 500px;
+            }
+
+            .swiper-button-prev,
+            .swiper-button-next {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Slider Section -->
+    <section class="hero-slider-section">
+        <div class="swiper hero-swiper">
+            <div class="swiper-wrapper">
+                
+                <!-- Slide 1 - Video -->
+                <div class="swiper-slide">
+                    <div class="hero-slide-video">
+                        <video class="hero-video" autoplay muted loop playsinline>
+                            <source src="path-to-your-video.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="hero-slide-overlay"></div>
+                    </div>
+                    <div class="hero-slide-content">
+                        <div class="container">
+                            <h1 class="hero-title">Lighting Innovation</h1>
+                            <p class="hero-description">Discover cutting-edge lighting solutions that transform spaces</p>
+                            <a href="#" class="hero-button">Explore More</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2 - Image -->
+                <div class="swiper-slide">
+                    <div class="hero-slide-image" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920');">
+                        <div class="hero-slide-overlay"></div>
+                    </div>
+                    <div class="hero-slide-content">
+                        <div class="container">
+                            <h1 class="hero-title">Architectural Excellence</h1>
+                            <p class="hero-description">Where design meets functionality in perfect harmony</p>
+                            <a href="#" class="hero-button">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3 - Image -->
+                <div class="swiper-slide">
+                    <div class="hero-slide-image" style="background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920');">
+                        <div class="hero-slide-overlay"></div>
+                    </div>
+                    <div class="hero-slide-content">
+                        <div class="container">
+                            <h1 class="hero-title">Future of Illumination</h1>
+                            <p class="hero-description">Smart lighting systems for modern living</p>
+                            <a href="#" class="hero-button">Discover</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <!-- Navigation -->
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+            
+            <!-- Pagination -->
+            <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <!-- Initialize Swiper -->
+    <script>
+        const heroSwiper = new Swiper('.hero-swiper', {
+            loop: true,
+            speed: 1000,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            effect: 'fade',
+            fadeEffect: {
+                crossFade: true
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        });
+
+        // Pause video when slide changes
+        heroSwiper.on('slideChange', function () {
+            const videos = document.querySelectorAll('.hero-video');
+            videos.forEach(video => {
+                video.pause();
+            });
+            
+            const activeSlide = document.querySelector('.swiper-slide-active');
+            const activeVideo = activeSlide?.querySelector('.hero-video');
+            if (activeVideo) {
+                activeVideo.play();
+            }
+        });
+    </script>
+
+</body>
+</html>

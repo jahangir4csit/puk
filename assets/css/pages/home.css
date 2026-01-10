@@ -1,0 +1,417 @@
+/* ========================================
+   Home Page Styles
+======================================== */
+
+/* Introduction Section */
+.intro-section {
+    padding-top: 236px;
+    background-color: #ffffff;
+}
+
+.intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.intro-content {
+    padding-right: 40px;
+}
+.intro-content,
+.intro-content p{
+    color: #8A8A8A;
+font-family: "Rethink Sans";
+font-size: 28px;
+font-style: normal;
+font-weight: 400;
+line-height: 120%;
+letter-spacing: -0.28px;
+}
+.intro-content strong,
+.intro-content p strong{
+    color: #000;
+font-weight: 400;
+}
+.intro-product-card{
+    padding-top: 200px;
+}
+.intro-grid-right{
+    display: flex;
+    align-items: flex-end;
+}
+.intro-product-card,
+.intro-project-card{
+    position: relative;
+    overflow: hidden;
+}
+.intro-product-card img,
+.intro-project-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.intro-project-card:hover img,
+.intro-product-card:hover img {
+    transform: scale(1.05);
+}
+
+.intro-card-link {
+    position: absolute;
+    bottom: 25px;
+    left: 32px;
+    background-color: #D9D9D9;
+    color: #000000;
+    padding: 7px 14px;
+    font-size: 19px;
+    line-height: 150%;
+    letter-spacing: -0.19px;
+    font-weight: 400;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    min-width: 244px;
+    width: max-content;
+}
+
+.intro-card-link:hover {
+    background-color: rgba(255, 255, 255, 1);
+    color: #000000;
+}
+
+/* Made to Matter Section */
+.made-to-matter-section {
+    padding: 112px 0 100px 0;
+}
+.made-to-matter-section h2 {
+    color: #000;
+    font-family: "Rethink Sans";
+    font-size: 80px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 120%;
+    letter-spacing: -0.8px;
+}
+.matter-row{
+    padding-top: 156px;
+}
+.matter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.matter-column {
+    padding: 0;
+}
+
+.matter-text,.matter-text p {
+color: #000;
+font-family: "Rethink Sans";
+font-size: 28px;
+font-style: normal;
+font-weight: 400;
+line-height: 120%; /* 33.6px */
+letter-spacing: -0.28px;
+}
+.matter-text-sm, .matter-text-sm p{
+    color: #000;
+    font-family: "Rethink Sans";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 120%;
+    letter-spacing: -0.2px;
+}
+
+/* Latest Stories Section */
+.latest-stories-section {
+    padding: 100px 0;
+}
+
+.section-label {
+    color: #000;
+    font-family: "Rethink Sans";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 150%; /* 24px */
+    letter-spacing: -0.16px;
+    text-transform: uppercase;
+}
+
+.hstories-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+}
+.hstories-grid,
+.news-grid{
+    padding-top: 46px;
+}
+
+.hstory-card .story-image{
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 143 / 144;
+}
+.hstory-card.even .story-image{
+    aspect-ratio: 427 / 641;
+}
+.story-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+.story-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.hstory-card:hover .story-image img {
+    transform: scale(1.05);
+}
+
+.story-content {
+    padding: 44px 24px 0 24px;
+}
+.news-date,
+.story-tag{
+    color: rgba(0, 0, 0, 0.50);
+    font-family: "Rethink Sans";
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: -0.16px;
+    text-transform: uppercase;
+    padding-bottom: 20px;
+}
+.news-excerpt,
+.story-title {
+    color: #000;
+    font-family: "Rethink Sans";
+    font-size: 25px;
+    font-weight: 400;
+    line-height: 120%;
+    letter-spacing: -0.28px;
+}
+
+/* Latest News Section */
+.latest-news-section {
+    padding: 100px 0 200px;
+}
+.news-card {
+    background-color: #ffffff;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+.news-card:hover {
+    transform: translateY(-5px);
+}
+.news-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+.news-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background-color: #000000;
+}
+
+.news-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+.news-card:hover .news-image img {
+    opacity: 0.8;
+}
+.news-title-wrap{
+    width: 100%;
+    height: 229px;
+    background: #C0BAB0;
+}
+.news-content {
+    padding: 30px 24px;
+}
+.news-title-wrap{
+    padding: 40px 24px;
+    display: flex;
+    align-items: flex-end;
+}
+.news-title {
+    color: #FFF;
+    font-family: "Rethink Sans";
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 109.375%;
+    letter-spacing: -0.32px;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.news-excerpt{
+    margin-bottom: 22px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Responsive Styles */
+@media (max-width: 1200px) {
+        .intro-section,
+    .made-to-matter-section,
+    .latest-stories-section,
+    .latest-news-section {
+        padding: 60px 0;
+    }
+    .made-to-matter-section h2 {
+        font-size: 48px;
+    }
+    .matter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .intro-product-card{
+        padding-top: 80px;
+    }
+    .hstories-grid{
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .matter-row,
+    .matter-grid {
+        padding-top: 52px;
+    }
+    .news-title,.intro-content, .intro-content p{
+        font-size: 24px;
+    }
+    .news-excerpt, .story-title{
+        font-size: 22px;
+    }
+}
+@media (max-width: 992px) {
+    .made-to-matter-section,
+    .latest-stories-section,
+    .latest-news-section {
+        padding: 44px 0;
+    }
+    .intro-section{
+        padding: 60px 0 20px 0;
+    }
+    .intro-grid{
+        grid-template-columns: 1fr;
+    }
+    .matter-grid {
+        padding-top: 32px;
+    }
+        .intro-product-card{
+        padding-top: 64px;
+    }
+    .matter-row {
+        padding-top: 44px;
+    }
+    .matter-text, .matter-text p,
+    .intro-content, .intro-content p,.news-title,
+    .news-excerpt, .story-title{
+        font-size: 24px;
+    }
+    .story-content {
+        padding: 32px 18px 0 18px;
+    }
+}
+@media (max-width: 768px) {
+    .intro-section,
+    .made-to-matter-section,
+    .latest-stories-section,
+    .latest-news-section {
+        padding: 32px 0;
+    }
+    .intro-section{
+        padding-top: 52px;
+    }
+    .intro-content {
+        padding-right: 0;
+    }
+    .intro-product-card{
+        padding-top: 60px;
+    }
+    .matter-grid {
+        grid-template-columns: 1fr;
+    }
+    .made-to-matter-section h2 {
+        font-size: 36px;
+    }
+
+    .intro-subtitle {
+        font-size: 20px;
+    }
+
+    .hstories-grid{
+        grid-template-columns: 1fr;
+    }
+    .story-image,
+    .news-image {
+        height: 250px;
+    }
+    .matter-row,
+    .hstories-grid, .news-grid {
+        padding-top: 32px;
+    }
+    .intro-card-link{
+        font-size: 18px;
+    }
+    .matter-text, .matter-text p,
+    .intro-content p,.news-title,
+    .news-excerpt, .story-title{
+        font-size: 20px;
+    }
+    .news-date, .story-tag{
+        padding-bottom: 14px;
+    }
+    .story-content,.news-content {
+        padding: 32px 16px 0 16px;
+    }
+    .news-excerpt {
+        margin-bottom: 16px;
+    }
+    .news-content{
+        padding-bottom: 16px;
+    }
+    .news-title-wrap{
+        height: 170px;
+    }
+}
+
+@media (max-width: 520px) {
+    .intro-card-link {
+        bottom: 14px;
+        left: 14px;
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+    .intro-product-card{
+        padding-top: 40px;
+    }
+    .matter-row {
+        padding-top: 32px;
+    }
+    .made-to-matter-section h2 {
+        font-size: 28px;
+    }
+    .intro-subtitle {
+        font-size: 18px;
+    }
+    .intro-product-card {
+        padding-top: 44px;
+    }
+}

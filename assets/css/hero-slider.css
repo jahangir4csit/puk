@@ -1,0 +1,82 @@
+/**
+ * Hero Slider Styles
+ * 
+ * @package Puk
+ */
+
+/* Hero Slider Wrapper */
+.hero-slider-section {
+    position: relative;
+    width: 100%;
+    /* min-height: 966px; */
+    height: calc(100vh - 114px);
+    overflow: hidden;
+}
+
+/* Swiper Container */
+.hero-swiper {
+    width: 100%;
+    height: 100%;
+}
+
+.hero-swiper .swiper-slide {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Video Slide */
+.hero-slide-video {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+}
+
+/* Image Slide */
+.hero-slide-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .hero-slider-section {
+        height: calc(700px - 114px);
+    }
+}
+
+@media (max-width: 992px) {
+    .hero-slider-section {
+        height: calc(650px - 114px);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-slider-section {
+        height: calc(600px - 114px);
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-slider-section {
+        height: calc(500px - 114px);
+    }
+}

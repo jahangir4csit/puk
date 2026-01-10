@@ -1,0 +1,92 @@
+@font-face {
+    font-family: 'Ubuntu-Bold';
+    src: url(fonts/Ubuntu-Bold.ttf);
+}
+
+@font-face {
+    font-family: 'Ubuntu-Medium';
+    src: url(fonts/Ubuntu-Medium.ttf);
+}
+
+@font-face {
+    font-family: 'Ubuntu-Light';
+    src: url(fonts/Ubuntu-Light.ttf);
+}
+
+@font-face {
+    font-family: 'Ubuntu-Regular';
+    src: url(fonts/Ubuntu-Regular.ttf)
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+li,
+ul {
+    margin: 0px;
+    padding: 0px;
+}
+
+ul {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+.container {
+    max-width: 1440px;
+}
+
+.form-control:focus {
+    border: none;
+    box-shadow: none;
+}
+
+@media all and (max-width: 1600px) {
+    .container {
+        max-width: 85%;
+    }
+}
+
+@media all and (max-width: 1024px) {
+    .container-fluid {
+        max-width: 100%;
+    }
+
+    .container {
+        max-width: 100%;
+    }
+}
+
+body {
+    animation: fadeInAnimation ease 3s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    max-width: 2550px;
+    margin: auto;
+    /* padding-top: 65px; */
+}
+
+@keyframes fadeInAnimation {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* end basic setup */
+
+/* Slick nav mobile menu start  */
+@media all and (max-width: 1200px) {}
+
+/* Slick nav mobile menu start  */
+/* end menu design  */

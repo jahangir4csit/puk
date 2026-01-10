@@ -1,0 +1,89 @@
+/*
+Theme Name: PUK
+Theme URI: https://www.red-apple.it/
+Author: Red Apple International
+Author URI: https://www.red-apple.it/
+GitHub Theme URI: https://www.red-apple.it/
+Description: The renowned WordPress starter theme framework that combined Underscores and Bootstrap. Trusted by more than 100,000 developers for building handcrafted, custom WordPress sites.
+Version: 1.0.1
+Requires at least: 5.0
+Tested up to: 5.8
+Requires PHP: 5.2
+License: GNU General Public License v3 or later
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
+Text Domain: puk
+Tags: one-column, two-columns, three-columns, left-sidebar, right-sidebar, custom-background, custom-logo, custom-menu, featured-images, footer-widgets, full-width-template, theme-options, translation-ready
+
+redapple WordPress Theme, (C) 2021 Howard Development & Consulting, LLC
+redapple is distributed under the terms of the GNU GPL.
+
+Resource Licenses:
+redapple is based on Underscores https://underscores.me/, (C) Automattic, Inc.
+Font Awesome: https://fontawesome.com/v4.7/license/ (Font: SIL OFL 1.1, (S)CSS: MIT)
+Bootstrap: https://getbootstrap.com | https://github.com/twbs/bootstrap/blob/master/LICENSE (MIT)
+WP Bootstrap Navwalker by Edward McIntyre & William Patton: https://github.com/twittem/wp-bootstrap-navwalker (GNU GPLv3)
+*/
+
+/*
+Do not modify the parent redapple theme. Instead, download a copy of the redapple Child starter theme and do all your development within the child theme.
+Full developer documentation: https://docs.redapple.com
+*/
+
+.vc_row.wpb_row.vc_row-fluid {
+    margin: 0;
+}
+
+/* Header Animations & States */
+#home-page .hero-slider-section {
+    margin-top: 114px;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    transform: translateY(-100%);
+    /* Start hidden for initial reveal */
+}
+
+header .main-header {
+    background: #fff;
+    transition: padding 0.4s ease, background 0.4s ease;
+}
+
+header.header-scrolled .main-header {
+    padding: 12px 60px !important;
+}
+
+/* Smooth logo resize */
+.logo-box img {
+    transition: max-width 0.4s ease !important;
+    max-width: 94px;
+    height: auto;
+}
+
+header.header-scrolled .logo-box img {
+    max-width: 64px;
+}
+
+/* Smooth hide state */
+header.header-hidden {
+    transform: translateY(-100%) !important;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Smooth show transition after hiding */
+header:not(.header-hidden) {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+section.intro-section,
+section.made-to-matter-section {
+    overflow: visible !important;
+}
+
+.empty_message{
+    padding: 20px;
+}

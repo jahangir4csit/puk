@@ -1,0 +1,102 @@
+.blog_content_details .puk-post-card__body,
+.puk-post-card .puk-post-card__body{
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+.puk-post-card__link:hover .puk-post-card__title{
+    text-decoration: underline;
+}
+.puk-post-card__date{
+    flex: 0 0 132px;
+    text-align: right;
+    color: rgba(0, 0, 0, 0.50);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 120%; /* 16.8px */
+    letter-spacing: -0.28px;
+}
+.puk-post-card__media{
+    flex: 1 1 auto;
+    min-width: 285px;
+    overflow: hidden;
+}
+.puk-post-card__media img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+.puk-post-card__content{
+    padding-left: 1rem;
+    flex: 0 0 336px;
+}
+.puk-post-card__title,
+.puk-post-card__title a
+{
+    color: #000;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 22px; /* 100% */
+    margin-bottom: 20px;
+}
+.puk-post-card__excerpt{
+    color: #8A8A8A;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 120%; /* 21.6px */
+    letter-spacing: -0.36px;
+    margin-bottom: 12px;
+}
+.puk-post-card__excerpt ul{
+    padding-top: 1.25rem;
+    list-style: disc;
+    margin-left: 32px;
+}
+.puk-post-card__watermark{
+    position: absolute;
+    bottom: 0;
+    z-index: 1;
+}
+.puk-post-card__media.video span {
+    color: rgba(0, 0, 0, 0.05);
+    font-size: 250px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 40px; /* 16% */
+    letter-spacing: -2.5px;
+}
+.puk-post-card__shadow{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.puk-post-card__shadow.light{
+    background: lightgray -173.406px -182.143px / 160.898% 152.624% no-repeat;
+    background-blend-mode: multiply;
+}
+
+@media (max-width: 1200px) {
+    .puk-post-card__body{
+        flex-direction: column;
+    }
+    .puk-post-card__date,
+    .puk-post-card__content{
+        flex: auto;
+    }
+    .puk-post-card__content{
+        padding-left: 0;
+        padding-top: 16px;
+    }
+}
+@media (max-width: 1024px) {
+    .blog_content{
+        padding-top: 38px;
+    }
+}
+@media (max-width: 640px) {
+    .puk-post-card__content {
+        padding-top: 14px;
+    }
+}
