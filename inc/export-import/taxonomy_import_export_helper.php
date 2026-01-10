@@ -2,7 +2,7 @@
 /**
  * Taxonomy Import/Export Helper
  * 
- * Handles CSV export and import for 'products-family' taxonomy with ACF fields.
+ * Handles CSV export and import for 'product-family' taxonomy with ACF fields.
  * 
  * @package puk
  */
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Puk_Taxonomy_Importer_Exporter {
 
-    private $taxonomy = 'products-family';
+    private $taxonomy = 'product-family';
     private $acf_fields = [];
 
     public function __construct() {
@@ -90,7 +90,7 @@ class Puk_Taxonomy_Importer_Exporter {
         }
 
         // Set headers for CSV download
-        $filename = 'products-family-taxonomy-export-' . date( 'Y-m-d' ) . '.csv';
+        $filename = 'product-family-taxonomy-export-' . date( 'Y-m-d' ) . '.csv';
         header( 'Content-Type: text/csv; charset=utf-8' );
         header( 'Content-Disposition: attachment; filename=' . $filename );
 
@@ -110,6 +110,7 @@ class Puk_Taxonomy_Importer_Exporter {
             'Description',
             'Featured Subfamily', // Sub Family only (Level 2) - Image
             'Technical Drawing', // Sub Family only (Level 2)
+            'Subfamily Gallery', // Sub Family only (Level 2) - Image Gallery
             'Designer', // Sub Family only (Level 2)
         ];
         
@@ -123,13 +124,12 @@ class Puk_Taxonomy_Importer_Exporter {
             'Featured Subfamily',
             'Features hover image',
             'Featured Subfamily Hover',
-            'Sub Family Product Image'
+            'Sub Family Product Image',
+            'Gallery 1'
         ];
         
         // Column name mapping for renaming ACF fields in CSV
-        $column_name_mapping = [
-            'Gallery 1' => 'Subfamily Gallery'
-        ];
+        $column_name_mapping = [];
         
         foreach ( $this->acf_fields as $field ) {
             if ( ! in_array( $field['label'], $skip_acf_labels ) ) {
@@ -189,6 +189,7 @@ class Puk_Taxonomy_Importer_Exporter {
             // Get Sub Family specific fields - ONLY for Level 2
             $featured_image = '';
             $technical_drawing = '';
+            $subfamily_gallery = '';
             $designer = '';
             if ( $level === 2 ) {
                 // Get featured image - export as URL
@@ -225,6 +226,23 @@ class Puk_Taxonomy_Importer_Exporter {
                     }
                 }
                 
+                // Get subfamily gallery - export as comma-separated URLs
+                $gallery_data = get_field( 'pf_subfam_product_image', $this->taxonomy . '_' . $term->term_id );
+                if ( ! empty( $gallery_data ) && is_array( $gallery_data ) ) {
+                    $gallery_urls = [];
+                    foreach ( $gallery_data as $img ) {
+                        if ( is_array( $img ) && isset( $img['url'] ) ) {
+                            $gallery_urls[] = $img['url'];
+                        } elseif ( is_numeric( $img ) ) {
+                            $url = wp_get_attachment_url( $img );
+                            if ( $url ) $gallery_urls[] = $url;
+                        } elseif ( is_string( $img ) && filter_var( $img, FILTER_VALIDATE_URL ) ) {
+                            $gallery_urls[] = $img;
+                        }
+                    }
+                    $subfamily_gallery = implode( ',', $gallery_urls );
+                }
+                
                 $designer = get_field( 'pf_designed_by', $this->taxonomy . '_' . $term->term_id );
             }
             
@@ -238,6 +256,7 @@ class Puk_Taxonomy_Importer_Exporter {
                 $term->description,
                 $featured_image ?: '', // Featured Subfamily - only for Level 2 (Sub Family)
                 $technical_drawing ?: '', // Technical Drawing - only for Level 2 (Sub Family)
+                $subfamily_gallery ?: '', // Subfamily Gallery - only for Level 2 (Sub Family)
                 $designer ?: '', // Designer - only for Level 2 (Sub Family)
             ];
             
@@ -251,7 +270,8 @@ class Puk_Taxonomy_Importer_Exporter {
                 'Featured Subfamily',
                 'Features hover image',
                 'Featured Subfamily Hover',
-                'Sub Family Product Image'
+                'Sub Family Product Image',
+                'Gallery 1'
             ];
             
             foreach ( $this->acf_fields as $field ) {
@@ -473,6 +493,7 @@ class Puk_Taxonomy_Importer_Exporter {
             // Sub Family specific fields
             $featured_image = isset( $item['featured subfamily'] ) ? trim( $item['featured subfamily'] ) : '';
             $technical_drawing = isset( $item['technical drawing'] ) ? trim( $item['technical drawing'] ) : '';
+            $subfamily_gallery = isset( $item['subfamily gallery'] ) ? trim( $item['subfamily gallery'] ) : '';
             $designer = isset( $item['designer'] ) ? trim( $item['designer'] ) : '';
             
             // Determine which term to create/update based on hierarchy
@@ -596,6 +617,29 @@ class Puk_Taxonomy_Importer_Exporter {
                         update_field( 'pf_subfam_tech_drawing', intval( $technical_drawing ), $this->taxonomy . '_' . $new_term_id );
                     }
                 }
+                
+                // Handle Subfamily Gallery
+                if ( ! empty( $subfamily_gallery ) ) {
+                    $gallery_items = explode( ',', $subfamily_gallery );
+                    $gallery_ids = [];
+                    foreach ( $gallery_items as $gallery_item ) {
+                        $gallery_item = trim( $gallery_item );
+                        if ( empty( $gallery_item ) ) continue;
+                        
+                        if ( filter_var( $gallery_item, FILTER_VALIDATE_URL ) ) {
+                            $attachment_id = $this->insert_attachment_from_url( $gallery_item );
+                            if ( $attachment_id && ! is_wp_error( $attachment_id ) ) {
+                                $gallery_ids[] = $attachment_id;
+                            }
+                        } elseif ( is_numeric( $gallery_item ) ) {
+                            $gallery_ids[] = intval( $gallery_item );
+                        }
+                    }
+                    if ( ! empty( $gallery_ids ) ) {
+                        update_field( 'pf_subfam_product_image', $gallery_ids, $this->taxonomy . '_' . $new_term_id );
+                    }
+                }
+
                 if ( ! empty( $designer ) ) {
                     update_field( 'pf_designed_by', $designer, $this->taxonomy . '_' . $new_term_id );
                 }
@@ -611,13 +655,12 @@ class Puk_Taxonomy_Importer_Exporter {
                 'Featured Subfamily',
                 'Features hover image',
                 'Featured Subfamily Hover',
-                'Sub Family Product Image'
+                'Sub Family Product Image',
+                'Gallery 1'
             ];
             
             // Column name mapping for renaming ACF fields in CSV
-            $column_name_mapping = [
-                'Gallery 1' => 'Subfamily Gallery 1'
-            ];
+            $column_name_mapping = [];
             
             // Create reverse mapping for import
             $reverse_mapping = array_flip( $column_name_mapping );
@@ -853,28 +896,33 @@ class Puk_Taxonomy_Importer_Exporter {
                 }
                 break;
                 
-            case 'gallery':
-                // Handle comma-separated image IDs
-                $items = array_map( 'trim', explode( ',', $value ) );
-                $image_ids = [];
-                
-                foreach ( $items as $item ) {
-                    if ( empty( $item ) ) continue;
-                    
-                    if ( is_numeric( $item ) ) {
-                        $image_ids[] = intval( $item );
-                    }
-                }
-                
                 if ( ! empty( $image_ids ) ) {
                     update_field( $field['name'], $image_ids, $this->taxonomy . '_' . $term_id );
+                } elseif ( ! empty( $items ) ) {
+                    // Try to handle URLs if no numeric IDs found
+                    foreach ( $items as $item ) {
+                        if ( filter_var( $item, FILTER_VALIDATE_URL ) ) {
+                            $attachment_id = $this->insert_attachment_from_url( $item );
+                            if ( $attachment_id && ! is_wp_error( $attachment_id ) ) {
+                                $image_ids[] = $attachment_id;
+                            }
+                        }
+                    }
+                    if ( ! empty( $image_ids ) ) {
+                        update_field( $field['name'], $image_ids, $this->taxonomy . '_' . $term_id );
+                    }
                 }
                 break;
                 
             case 'image':
-                // Expecting image ID
+                // Expecting image ID or URL
                 if ( is_numeric( $value ) ) {
                     update_field( $field['name'], intval( $value ), $this->taxonomy . '_' . $term_id );
+                } elseif ( filter_var( $value, FILTER_VALIDATE_URL ) ) {
+                    $attachment_id = $this->insert_attachment_from_url( $value );
+                    if ( $attachment_id && ! is_wp_error( $attachment_id ) ) {
+                        update_field( $field['name'], $attachment_id, $this->taxonomy . '_' . $term_id );
+                    }
                 }
                 break;
                 

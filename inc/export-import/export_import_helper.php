@@ -2,7 +2,7 @@
 /**
  * Product Import/Export Helper
  * 
- * Handles CSV export and import for 'products' CPT and 'products-family' taxonomy.
+ * Handles CSV export and import for 'products' CPT and 'product-family' taxonomy.
  * 
  * @package puk
  */
@@ -13,8 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Puk_Product_Importer_Exporter {
 
-    private $post_type = 'products';
-    private $taxonomy  = 'products-family';
+    private $post_type = 'product';
+    private $taxonomy  = 'product-family';
     private $acf_fields = [];
 
     public function __construct() {
@@ -197,7 +197,7 @@ class Puk_Product_Importer_Exporter {
     public function register_admin_menu() {
         add_submenu_page(
             'edit.php?post_type=' . $this->post_type,
-            __( 'Import/Export Products', 'puk' ),
+            __( 'Import/Export Product', 'puk' ),
             __( 'Import/Export', 'puk' ),
             'manage_options',
             'puk-product-import-export',
@@ -276,11 +276,11 @@ class Puk_Product_Importer_Exporter {
 
         <!-- Products Family Taxonomy Section -->
         <div class="puk-import-export-card">
-            <h2><?php _e( 'Products Family Taxonomy', 'puk' ); ?></h2>
+            <h2><?php _e( 'Product Family Taxonomy', 'puk' ); ?></h2>
 
             <!-- Export Taxonomy -->
             <h3><?php _e( 'Export Taxonomy', 'puk' ); ?></h3>
-            <p><?php _e( 'Download all products-family taxonomy terms and their ACF fields as a CSV file.', 'puk' ); ?>
+            <p><?php _e( 'Download all product-family taxonomy terms and their ACF fields as a CSV file.', 'puk' ); ?>
             </p>
             <form method="post" action="">
                 <input type="hidden" name="puk_action" value="export_taxonomy">
@@ -290,7 +290,7 @@ class Puk_Product_Importer_Exporter {
 
             <!-- Import Taxonomy -->
             <h3><?php _e( 'Import Taxonomy', 'puk' ); ?></h3>
-            <p><?php _e( 'Upload a CSV file to import products-family taxonomy terms. Ensure headers match exactly.', 'puk' ); ?>
+            <p><?php _e( 'Upload a CSV file to import product-family taxonomy terms. Ensure headers match exactly.', 'puk' ); ?>
             </p>
             <form method="post" enctype="multipart/form-data">
                 <input type="hidden" name="puk_action" value="import_taxonomy">
@@ -342,6 +342,74 @@ class Puk_Product_Importer_Exporter {
                 <?php submit_button( __( 'Run Import', 'puk' ), 'secondary', 'submit_import_finish_color' ); ?>
             </form>
         </div>
+
+        <!-- Accessories Taxonomy Section -->
+        <div class="puk-import-export-card">
+            <h2><?php _e( 'Accessories Taxonomy', 'puk' ); ?></h2>
+
+            <!-- Export Accessories -->
+            <h3><?php _e( 'Export Accessories', 'puk' ); ?></h3>
+            <p><?php _e( 'Download all accessories taxonomy terms and their ACF fields as a CSV file.', 'puk' ); ?></p>
+            <form method="post" action="">
+                <input type="hidden" name="puk_action" value="export_accessories">
+                <?php wp_nonce_field( 'puk_export_accessories_nonce', '_wpnonce_export_accessories' ); ?>
+                <?php submit_button( __( 'Export Accessories', 'puk' ), 'primary', 'submit_export_accessories' ); ?>
+            </form>
+
+            <!-- Import Accessories -->
+            <h3><?php _e( 'Import Accessories', 'puk' ); ?></h3>
+            <p><?php _e( 'Upload a CSV file to import accessories taxonomy terms. Ensure headers match exactly.', 'puk' ); ?>
+            </p>
+            <form method="post" enctype="multipart/form-data">
+                <input type="hidden" name="puk_action" value="import_accessories">
+                <?php wp_nonce_field( 'puk_import_accessories_nonce', '_wpnonce_import_accessories' ); ?>
+
+                <table class="form-table">
+                    <tr valign="top">
+                        <th scope="row"><label
+                                for="import_accessories_file"><?php _e( 'Choose CSV File', 'puk' ); ?></label></th>
+                        <td><input type="file" name="import_accessories_file" id="import_accessories_file"
+                                accept=".csv" required></td>
+                    </tr>
+                </table>
+
+                <?php submit_button( __( 'Run Import', 'puk' ), 'secondary', 'submit_import_accessories' ); ?>
+            </form>
+        </div>
+
+        <!-- Features Taxonomy Section -->
+        <div class="puk-import-export-card">
+            <h2><?php _e( 'Features Taxonomy', 'puk' ); ?></h2>
+
+            <!-- Export Features -->
+            <h3><?php _e( 'Export Features', 'puk' ); ?></h3>
+            <p><?php _e( 'Download all features taxonomy terms and their ACF fields as a CSV file.', 'puk' ); ?></p>
+            <form method="post" action="">
+                <input type="hidden" name="puk_action" value="export_features">
+                <?php wp_nonce_field( 'puk_export_features_nonce', '_wpnonce_export_features' ); ?>
+                <?php submit_button( __( 'Export Features', 'puk' ), 'primary', 'submit_export_features' ); ?>
+            </form>
+
+            <!-- Import Features -->
+            <h3><?php _e( 'Import Features', 'puk' ); ?></h3>
+            <p><?php _e( 'Upload a CSV file to import features taxonomy terms. Ensure headers match exactly.', 'puk' ); ?>
+            </p>
+            <form method="post" enctype="multipart/form-data">
+                <input type="hidden" name="puk_action" value="import_features">
+                <?php wp_nonce_field( 'puk_import_features_nonce', '_wpnonce_import_features' ); ?>
+
+                <table class="form-table">
+                    <tr valign="top">
+                        <th scope="row"><label
+                                for="import_features_file"><?php _e( 'Choose CSV File', 'puk' ); ?></label></th>
+                        <td><input type="file" name="import_features_file" id="import_features_file"
+                                accept=".csv" required></td>
+                    </tr>
+                </table>
+
+                <?php submit_button( __( 'Run Import', 'puk' ), 'secondary', 'submit_import_features' ); ?>
+            </form>
+        </div>
     </div>
 </div>
 <?php
@@ -364,7 +432,7 @@ class Puk_Product_Importer_Exporter {
         }
 
         // Set headers for CSV download
-        $filename = 'products-export-' . date( 'Y-m-d' ) . '.csv';
+        $filename = 'product-export-' . date( 'Y-m-d' ) . '.csv';
         header( 'Content-Type: text/csv; charset=utf-8' );
         header( 'Content-Disposition: attachment; filename=' . $filename );
 
@@ -381,7 +449,7 @@ class Puk_Product_Importer_Exporter {
             'Title',
             'Content',
             'Status',
-            'Products Family', // Taxonomy
+            'Product Family', // Taxonomy
         ];
         
         // Add ACF field headers
@@ -799,9 +867,9 @@ class Puk_Product_Importer_Exporter {
                 update_field( '_import_uid', $import_uid, $new_post_id );
             }
 
-            // --- Handle Taxonomy: Products Family (Hierarchical) ---
-            if ( ! empty( $item['products family'] ) ) {
-                $this->set_hierarchical_terms( $new_post_id, $item['products family'], $this->taxonomy );
+            // --- Handle Taxonomy: Product Family (Hierarchical) ---
+            if ( ! empty( $item['product family'] ) ) {
+                $this->set_hierarchical_terms( $new_post_id, $item['product family'], $this->taxonomy );
             }
 
             // --- Handle Featured Image ---

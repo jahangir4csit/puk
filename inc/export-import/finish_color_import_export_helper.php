@@ -112,12 +112,12 @@ class Puk_Finish_Color_Importer_Exporter {
 
         if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
             foreach ( $terms as $term ) {
-                // Get Color Code (tax_finish_code ACF field)
-                $color_code = get_field( 'tax_finish_code', $this->taxonomy . '_' . $term->term_id );
-                
-                // Get Color Image (tax_finish_color ACF field) - export as URL
+                // Get Color Code (tax_finish_color__code ACF field)
+                $color_code = get_field( 'tax_finish_color__code', $this->taxonomy . '_' . $term->term_id );
+
+                // Get Color Image (tax_finish_color__img ACF field) - export as URL
                 $color_image = '';
-                $color_image_data = get_field( 'tax_finish_color', $this->taxonomy . '_' . $term->term_id );
+                $color_image_data = get_field( 'tax_finish_color__img', $this->taxonomy . '_' . $term->term_id );
                 if ( ! empty( $color_image_data ) ) {
                     if ( is_array( $color_image_data ) && isset( $color_image_data['url'] ) ) {
                         $color_image = $color_image_data['url'];
@@ -286,22 +286,22 @@ class Puk_Finish_Color_Importer_Exporter {
                 continue;
             }
 
-            // Handle Color Code (tax_finish_code ACF field)
+            // Handle Color Code (tax_finish_color__code ACF field)
             if ( ! empty( $color_code ) ) {
-                update_field( 'tax_finish_code', $color_code, $this->taxonomy . '_' . $new_term_id );
+                update_field( 'tax_finish_color__code', $color_code, $this->taxonomy . '_' . $new_term_id );
             }
-            
-            // Handle Color Image (tax_finish_color ACF field)
+
+            // Handle Color Image (tax_finish_color__img ACF field)
             if ( ! empty( $color_image ) ) {
                 if ( filter_var( $color_image, FILTER_VALIDATE_URL ) ) {
                     // It's a URL, download and create attachment
                     $attachment_id = $this->insert_attachment_from_url( $color_image );
                     if ( $attachment_id && ! is_wp_error( $attachment_id ) ) {
-                        update_field( 'tax_finish_color', $attachment_id, $this->taxonomy . '_' . $new_term_id );
+                        update_field( 'tax_finish_color__img', $attachment_id, $this->taxonomy . '_' . $new_term_id );
                     }
                 } elseif ( is_numeric( $color_image ) ) {
                     // It's already an attachment ID
-                    update_field( 'tax_finish_color', intval( $color_image ), $this->taxonomy . '_' . $new_term_id );
+                    update_field( 'tax_finish_color__img', intval( $color_image ), $this->taxonomy . '_' . $new_term_id );
                 }
             }
 
@@ -350,7 +350,7 @@ class Puk_Finish_Color_Importer_Exporter {
                 'hide_empty' => false,
                 'meta_query' => [
                     [
-                        'key'     => 'tax_finish_code',
+                        'key'     => 'tax_finish_color__code',
                         'value'   => $color_code,
                         'compare' => '='
                     ]
