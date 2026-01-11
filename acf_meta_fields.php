@@ -23,9 +23,8 @@ $acf_field_definitions = [
     ["CCT", "pro_cct", "text"],
     ["Beam Angle", "pro_beam_angle", "text"],
     ["Lumens", "pro_lumens", "text"],
-    ["Finish", "pro_finish", "text"],
-    ["Finish Color", "pro_finish_color", "text"],
-    ["Dimming", "pro_dimming", "text"],
+    ["Finish Color", "pro_finish_color", "taxonomy"],
+    ["Dimming", "pro_dimming", "taxonomy"],
     ["IP Rating", "pro_iprating", "text"],
     ["IK Rating", "pro_ikrating", "text"],
     ["Material", "pro_material", "text"],
@@ -39,29 +38,15 @@ $acf_field_definitions = [
     ["Power Cable", "pro_pwr_cble", "text"],
     ["Gross Weight", "pro_grs_weight", "text"],
     ["Measurement Image", "pro_mesr_img", "image"],
-    
+    ["New", "prod_is__new", "true_false"],
+
     // Product Accessories
     ["Product Available", "pd_alavlbl_select_product", "relationship"],
-    
-    // Product Installation Accessories
-    ["Integrated Accessories Title", "pro_inte_access_stitle", "text"],
-    ["Integrated Accessories Description", "pro_inte_access_sdesc", "wysiwyg"],
-    ["Integrated Accessories Repeater", "pro_inte_access_rept", "repeater"],
-    ["Integrated Accessories Image", "pro_inte_access_img", "image"],
-    ["Integrated Accessories Name", "pro_inte_access_name", "text"],
-    ["Integrated Accessories Code", "pro_inte_access_code", "text"],
-    
-    // Product Not Included
-    ["Accessories Sec Title", "pro_acs_incld_stitle", "text"],
-    ["Accessories Sec Sub Title", "pro_acs_incld_stitlesub", "text"],
-    ["Product Not Included", "pro_not_incld", "repeater"],
-    ["Product Not Included Image", "pro_not_incld_img", "image"],
-    ["Product Not Included Title", "pro_not_incld_title", "text"],
-    ["Product Not Included Subtitle", "pro_not_incld_subtitle", "text"],
-    ["Product Not Included Description", "pro_not_incld_desc", "text"],
-    ["Product Not Included Name", "pro_not_incld_name", "text"],
-    ["Product Not Included Code", "pro_not_incld_code", "text"],
-    
+    ["ACC incl.", "prod_acc_in__terms", "taxonomy"],
+    ["ACC not incl.", "prod_acc_not_in__terms", "taxonomy"],
+    ["ACC incl. Description", "prod_acc_in__desc", "text"],
+    ["ACC not incl. Description", "prod_acc_not_in__subtitle", "text"],
+
     // Product Downloads
     ["LTD Files", "pro_dwnld_ltd_files", "file"],
     ["Instructions", "pro_dwnld_instructions", "file"],

@@ -311,6 +311,10 @@
             </div>
         </div>
 
+        <?php $get_mod = get_field('prod_acc_not_in__terms');
+        print_r($get_mod);
+        ?>
+
 
         <?php 
             $pro_inte_access_stitle = get_field('pro_inte_access_stitle');  

@@ -29,9 +29,6 @@ class Puk_Product_Importer_Exporter {
             }
         }
         
-        // Admin Menu
-        add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
-
         // Handle Actions
         add_action( 'admin_init', [ $this, 'handle_export_request' ] );
         add_action( 'admin_init', [ $this, 'handle_import_request' ] );
@@ -191,229 +188,6 @@ class Puk_Product_Importer_Exporter {
         return $fields;
     }
 
-    /**
-     * Registers the "Import/Export" submenu under "Products".
-     */
-    public function register_admin_menu() {
-        add_submenu_page(
-            'edit.php?post_type=' . $this->post_type,
-            __( 'Import/Export Product', 'puk' ),
-            __( 'Import/Export', 'puk' ),
-            'manage_options',
-            'puk-product-import-export',
-            [ $this, 'render_admin_page' ]
-        );
-    }
-
-    /**
-     * Renders the unified Import/Export Admin Page.
-     */
-    public function render_admin_page() {
-        ?>
-<div class="wrap">
-    <h1><?php _e( 'Import/Export Products', 'puk' ); ?></h1>
-
-    <style>
-    .puk-import-export-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        margin-top: 20px;
-    }
-
-    .puk-import-export-card {
-        background: #fff;
-        border: 1px solid #ccd0d4;
-        border-radius: 4px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
-        padding: 20px;
-    }
-
-    .puk-import-export-card h2 {
-        margin-top: 0;
-        border-bottom: 1px solid #e5e5e5;
-        padding-bottom: 10px;
-    }
-
-    @media screen and (max-width: 1024px) {
-        .puk-import-export-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    </style>
-
-    <div class="puk-import-export-grid">
-        <!-- Products Section -->
-        <div class="puk-import-export-card">
-            <h2><?php _e( 'Products', 'puk' ); ?></h2>
-
-            <!-- Export Products -->
-            <h3><?php _e( 'Export Products', 'puk' ); ?></h3>
-            <p><?php _e( 'Download all products and their metadata as a CSV file.', 'puk' ); ?></p>
-            <form method="post" action="">
-                <input type="hidden" name="puk_action" value="export_products">
-                <?php wp_nonce_field( 'puk_export_nonce', '_wpnonce_export' ); ?>
-                <?php submit_button( __( 'Export All Products', 'puk' ), 'primary', 'submit_export_products' ); ?>
-            </form>
-
-            <!-- Import Products -->
-            <h3><?php _e( 'Import Products', 'puk' ); ?></h3>
-            <p><?php _e( 'Upload a CSV file to import products. Ensure headers match exactly.', 'puk' ); ?></p>
-            <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="puk_action" value="import_products">
-                <?php wp_nonce_field( 'puk_import_nonce', '_wpnonce_import' ); ?>
-
-                <table class="form-table">
-                    <tr valign="top">
-                        <th scope="row"><label for="import_file"><?php _e( 'Choose CSV File', 'puk' ); ?></label></th>
-                        <td><input type="file" name="import_file" id="import_file" accept=".csv" required></td>
-                    </tr>
-                </table>
-
-                <?php submit_button( __( 'Run Import', 'puk' ), 'secondary', 'submit_import_products' ); ?>
-            </form>
-        </div>
-
-        <!-- Products Family Taxonomy Section -->
-        <div class="puk-import-export-card">
-            <h2><?php _e( 'Product Family Taxonomy', 'puk' ); ?></h2>
-
-            <!-- Export Taxonomy -->
-            <h3><?php _e( 'Export Taxonomy', 'puk' ); ?></h3>
-            <p><?php _e( 'Download all product-family taxonomy terms and their ACF fields as a CSV file.', 'puk' ); ?>
-            </p>
-            <form method="post" action="">
-                <input type="hidden" name="puk_action" value="export_taxonomy">
-                <?php wp_nonce_field( 'puk_export_taxonomy_nonce', '_wpnonce_export_taxonomy' ); ?>
-                <?php submit_button( __( 'Export Taxonomy', 'puk' ), 'primary', 'submit_export_taxonomy' ); ?>
-            </form>
-
-            <!-- Import Taxonomy -->
-            <h3><?php _e( 'Import Taxonomy', 'puk' ); ?></h3>
-            <p><?php _e( 'Upload a CSV file to import product-family taxonomy terms. Ensure headers match exactly.', 'puk' ); ?>
-            </p>
-            <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="puk_action" value="import_taxonomy">
-                <?php wp_nonce_field( 'puk_import_taxonomy_nonce', '_wpnonce_import_taxonomy' ); ?>
-
-                <table class="form-table">
-                    <tr valign="top">
-                        <th scope="row"><label
-                                for="import_taxonomy_file"><?php _e( 'Choose CSV File', 'puk' ); ?></label></th>
-                        <td><input type="file" name="import_taxonomy_file" id="import_taxonomy_file" accept=".csv"
-                                required></td>
-                    </tr>
-                </table>
-
-                <?php submit_button( __( 'Run Import', 'puk' ), 'secondary', 'submit_import_taxonomy' ); ?>
-            </form>
-        </div>
-
-        <!-- Finish Color Taxonomy Section -->
-        <div class="puk-import-export-card">
-            <h2><?php _e( 'Finish Color Taxonomy', 'puk' ); ?></h2>
-
-            <!-- Export Finish Color -->
-            <h3><?php _e( 'Export Finish Color', 'puk' ); ?></h3>
-            <p><?php _e( 'Download all finish-color taxonomy terms and their ACF fields as a CSV file.', 'puk' ); ?></p>
-            <form method="post" action="">
-                <input type="hidden" name="puk_action" value="export_finish_color">
-                <?php wp_nonce_field( 'puk_export_finish_color_nonce', '_wpnonce_export_finish_color' ); ?>
-                <?php submit_button( __( 'Export Finish Color', 'puk' ), 'primary', 'submit_export_finish_color' ); ?>
-            </form>
-
-            <!-- Import Finish Color -->
-            <h3><?php _e( 'Import Finish Color', 'puk' ); ?></h3>
-            <p><?php _e( 'Upload a CSV file to import finish-color taxonomy terms. Ensure headers match exactly.', 'puk' ); ?>
-            </p>
-            <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="puk_action" value="import_finish_color">
-                <?php wp_nonce_field( 'puk_import_finish_color_nonce', '_wpnonce_import_finish_color' ); ?>
-
-                <table class="form-table">
-                    <tr valign="top">
-                        <th scope="row"><label
-                                for="import_finish_color_file"><?php _e( 'Choose CSV File', 'puk' ); ?></label></th>
-                        <td><input type="file" name="import_finish_color_file" id="import_finish_color_file"
-                                accept=".csv" required></td>
-                    </tr>
-                </table>
-
-                <?php submit_button( __( 'Run Import', 'puk' ), 'secondary', 'submit_import_finish_color' ); ?>
-            </form>
-        </div>
-
-        <!-- Accessories Taxonomy Section -->
-        <div class="puk-import-export-card">
-            <h2><?php _e( 'Accessories Taxonomy', 'puk' ); ?></h2>
-
-            <!-- Export Accessories -->
-            <h3><?php _e( 'Export Accessories', 'puk' ); ?></h3>
-            <p><?php _e( 'Download all accessories taxonomy terms and their ACF fields as a CSV file.', 'puk' ); ?></p>
-            <form method="post" action="">
-                <input type="hidden" name="puk_action" value="export_accessories">
-                <?php wp_nonce_field( 'puk_export_accessories_nonce', '_wpnonce_export_accessories' ); ?>
-                <?php submit_button( __( 'Export Accessories', 'puk' ), 'primary', 'submit_export_accessories' ); ?>
-            </form>
-
-            <!-- Import Accessories -->
-            <h3><?php _e( 'Import Accessories', 'puk' ); ?></h3>
-            <p><?php _e( 'Upload a CSV file to import accessories taxonomy terms. Ensure headers match exactly.', 'puk' ); ?>
-            </p>
-            <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="puk_action" value="import_accessories">
-                <?php wp_nonce_field( 'puk_import_accessories_nonce', '_wpnonce_import_accessories' ); ?>
-
-                <table class="form-table">
-                    <tr valign="top">
-                        <th scope="row"><label
-                                for="import_accessories_file"><?php _e( 'Choose CSV File', 'puk' ); ?></label></th>
-                        <td><input type="file" name="import_accessories_file" id="import_accessories_file"
-                                accept=".csv" required></td>
-                    </tr>
-                </table>
-
-                <?php submit_button( __( 'Run Import', 'puk' ), 'secondary', 'submit_import_accessories' ); ?>
-            </form>
-        </div>
-
-        <!-- Features Taxonomy Section -->
-        <div class="puk-import-export-card">
-            <h2><?php _e( 'Features Taxonomy', 'puk' ); ?></h2>
-
-            <!-- Export Features -->
-            <h3><?php _e( 'Export Features', 'puk' ); ?></h3>
-            <p><?php _e( 'Download all features taxonomy terms and their ACF fields as a CSV file.', 'puk' ); ?></p>
-            <form method="post" action="">
-                <input type="hidden" name="puk_action" value="export_features">
-                <?php wp_nonce_field( 'puk_export_features_nonce', '_wpnonce_export_features' ); ?>
-                <?php submit_button( __( 'Export Features', 'puk' ), 'primary', 'submit_export_features' ); ?>
-            </form>
-
-            <!-- Import Features -->
-            <h3><?php _e( 'Import Features', 'puk' ); ?></h3>
-            <p><?php _e( 'Upload a CSV file to import features taxonomy terms. Ensure headers match exactly.', 'puk' ); ?>
-            </p>
-            <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="puk_action" value="import_features">
-                <?php wp_nonce_field( 'puk_import_features_nonce', '_wpnonce_import_features' ); ?>
-
-                <table class="form-table">
-                    <tr valign="top">
-                        <th scope="row"><label
-                                for="import_features_file"><?php _e( 'Choose CSV File', 'puk' ); ?></label></th>
-                        <td><input type="file" name="import_features_file" id="import_features_file"
-                                accept=".csv" required></td>
-                    </tr>
-                </table>
-
-                <?php submit_button( __( 'Run Import', 'puk' ), 'secondary', 'submit_import_features' ); ?>
-            </form>
-        </div>
-    </div>
-</div>
-<?php
-    }
 
     /**
      * Handles the CSV export generation.
@@ -442,23 +216,66 @@ class Puk_Product_Importer_Exporter {
         // Add BOM for Excel compatibility
         fprintf( $output, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
 
-        // Define CSV Headers
+        // Define CSV Headers in specific order
         $headers = [
-            'Post ID',
-            'Import UID', // Unique identifier for import/update
-            'Title',
-            'Content',
-            'Status',
-            'Product Family', // Taxonomy
+            'SKU', // Unique identifier for import/update
+            'Product Title',
+            'New',
+            'Main category', // Level 0
+            'Family', // Level 1
+            'Sub Family', // Level 2
+            'Sub Family Code', // ACF field from Sub Family term
         ];
-        
-        // Add ACF field headers
-        foreach ( $this->acf_fields as $field ) {
-            // Skip sub-fields in headers - only parent fields should be exported
-            if ( empty( $field['parent_repeater'] ) ) {
-                $headers[] = $field['label'];
+
+        // Define field order for remaining ACF fields
+        $ordered_field_names = [
+            'pro_wattage',
+            'pro_cct',
+            'pro_beam_angle',
+            'pro_lumens',
+            'pro_finish_color',
+            'pro_dimming',
+            'pro_iprating',
+            'pro_ikrating',
+            'pro_material',
+            'pro_coating',
+            'pro_light_source',
+            'pro_screws',
+            'pro_transformer',
+            'pro_gasket',
+            'pro_glass',
+            'pro_cable_gland',
+            'pro_pwr_cble',
+            'pro_grs_weight',
+            'pro_mesr_img',
+            'prod_acc_in__desc',
+            'prod_acc_in__terms',
+            'prod_acc_not_in__desc',
+            'prod_acc_not_in__terms',
+            'pro_remote_drv_slctn',
+            'pro_gallary',
+            'pro_sub_gallary',
+            'pd_alavlbl_select_product',
+            'pro_dwnld_ltd_files',
+            'pro_dwnld_instructions',
+            'pro_dwnld_revit',
+            'pro_dwnld_3dbim',
+            'pro_dwnld_photometric',
+            'pro_dwnld_provideo',
+        ];
+
+        // Add ACF field headers in the specified order
+        foreach ( $ordered_field_names as $field_name ) {
+            foreach ( $this->acf_fields as $field ) {
+                if ( $field['name'] === $field_name && empty( $field['parent_repeater'] ) ) {
+                    $headers[] = $field['label'];
+                    break;
+                }
             }
         }
+
+        // Add Status as the last column
+        $headers[] = 'Status';
 
         fputcsv( $output, $headers );
 
@@ -476,29 +293,34 @@ class Puk_Product_Importer_Exporter {
                 $post_id = get_the_ID();
 
                 // Basic Post Data
+                $taxonomy_levels = $this->get_taxonomy_levels( $post_id );
                 $row = [
-                    $post_id,
-                    get_field( '_import_uid', $post_id ), // Unique identifier
-                    html_entity_decode( get_the_title() ),
-                    get_the_content(), // Raw HTML
-                    get_post_status(),
-                    $this->get_taxonomy_string( $post_id ),
+                    get_field( 'prod__sku', $post_id ), // SKU
+                    html_entity_decode( get_the_title() ), // Product Title
+                    $this->get_acf_field_value( $post_id, ['name' => 'prod_is__new', 'type' => 'true_false'] ), // New
+                    $taxonomy_levels['main_category'], // Main category
+                    $taxonomy_levels['family'], // Family
+                    $taxonomy_levels['sub_family'], // Sub Family
+                    $taxonomy_levels['sub_family_code'], // Sub Family Code
                 ];
-                
-                // Add ACF field values
-                foreach ( $this->acf_fields as $field ) {
-                    $field_value = $this->get_acf_field_value( $post_id, $field );
-                    // Ensure field_value is a string for CSV export
-                    if (is_array($field_value)) {
-                        $field_value = json_encode($field_value);
-                    }
-                    $row[] = $field_value;
-                    
-                    // Debug: Log if field value is empty
-                    if ( defined( 'WP_DEBUG' ) && WP_DEBUG && empty( $field_value ) ) {
-                        error_log( "PUK Export/Import: Empty value for field '{$field['name']}' in post {$post_id}" );
+
+                // Add ACF field values in the specified order
+                foreach ( $ordered_field_names as $field_name ) {
+                    foreach ( $this->acf_fields as $field ) {
+                        if ( $field['name'] === $field_name && empty( $field['parent_repeater'] ) ) {
+                            $field_value = $this->get_acf_field_value( $post_id, $field );
+                            // Ensure field_value is a string for CSV export
+                            if (is_array($field_value)) {
+                                $field_value = json_encode($field_value);
+                            }
+                            $row[] = $field_value;
+                            break;
+                        }
                     }
                 }
+
+                // Add Status as the last column
+                $row[] = get_post_status();
 
                 fputcsv( $output, $row );
             }
@@ -613,11 +435,55 @@ class Puk_Product_Importer_Exporter {
             case 'color_picker':
                 // Return hex color value
                 return $value;
-                
+
             case 'wysiwyg':
                 // Return HTML content as-is
                 return $value;
-                
+
+            case 'taxonomy':
+                // Handle taxonomy fields - convert term ID to term name
+                // Determine taxonomy based on field name
+                $taxonomy = '';
+                if ( $field['name'] === 'pro_finish_color' ) {
+                    $taxonomy = 'finish-color';
+                } elseif ( $field['name'] === 'pro_dimming' ) {
+                    $taxonomy = 'features';
+                } elseif ( $field['name'] === 'prod_acc_in__terms' || $field['name'] === 'prod_acc_not_in__terms' ) {
+                    $taxonomy = 'accessories';
+                }
+
+                if ( ! empty( $taxonomy ) ) {
+                    // Value can be term ID or array of term IDs
+                    if ( is_array( $value ) ) {
+                        $term_values = [];
+                        foreach ( $value as $term_id ) {
+                            if ( is_numeric($term_id) ) {
+                                $term = get_term( $term_id, $taxonomy );
+                                if ( $term && ! is_wp_error( $term ) ) {
+                                    // If it's accessories taxonomy, try to get the code
+                                    $code = ($taxonomy === 'accessories') ? get_term_meta( $term->term_id, 'tax_acc__code', true ) : '';
+                                    $term_values[] = $code ? $code : $term->name;
+                                }
+                            } else {
+                                $term_values[] = $term_id;
+                            }
+                        }
+                        return ! empty( $term_values ) ? implode( ', ', $term_values ) : '';
+                    } elseif ( is_numeric($value) ) {
+                        // Single term ID
+                        $term = get_term( $value, $taxonomy );
+                        if ( $term && ! is_wp_error( $term ) ) {
+                            $code = ($taxonomy === 'accessories') ? get_term_meta( $term->term_id, 'tax_acc__code', true ) : '';
+                            return $code ? $code : $term->name;
+                        }
+                    }
+                }
+                return $value;
+
+            case 'true_false':
+                // Return 1 for true, 0 for false
+                return $value ? '1' : '0';
+
             case 'select':
             case 'text':
             case 'textarea':
@@ -666,6 +532,91 @@ class Puk_Product_Importer_Exporter {
         }
 
         return implode( ' > ', $path );
+    }
+
+    /**
+     * Get taxonomy levels as separate values (Main category, Family, Sub Family)
+     */
+    private function get_taxonomy_levels( $post_id ) {
+        $terms = get_the_terms( $post_id, $this->taxonomy );
+
+        $result = [
+            'main_category' => '',
+            'family' => '',
+            'sub_family' => '',
+            'sub_family_code' => ''
+        ];
+
+        if ( ! $terms || is_wp_error( $terms ) ) {
+            return $result;
+        }
+
+        // Get the deepest term (most specific category)
+        $deepest_term = null;
+        $max_depth = -1;
+
+        foreach ( $terms as $term ) {
+            $depth = $this->get_term_depth( $term );
+            if ( $depth > $max_depth ) {
+                $max_depth = $depth;
+                $deepest_term = $term;
+            }
+        }
+
+        if ( ! $deepest_term ) {
+            return $result;
+        }
+
+        // Build hierarchy array from deepest term to root
+        $hierarchy = [];
+        $hierarchy_terms = []; // Store term objects
+        $current_term = $deepest_term;
+
+        while ( $current_term ) {
+            array_unshift( $hierarchy, $current_term->name );
+            array_unshift( $hierarchy_terms, $current_term );
+
+            if ( $current_term->parent ) {
+                $current_term = get_term( $current_term->parent, $this->taxonomy );
+            } else {
+                break;
+            }
+        }
+
+        // Assign to levels: 0 = Main category, 1 = Family, 2 = Sub Family
+        if ( isset( $hierarchy[0] ) ) {
+            $result['main_category'] = $hierarchy[0];
+        }
+        if ( isset( $hierarchy[1] ) ) {
+            $result['family'] = $hierarchy[1];
+        }
+        if ( isset( $hierarchy[2] ) ) {
+            $result['sub_family'] = $hierarchy[2];
+
+            // Get the ACF field 'family_code' from the Sub Family term (level 2)
+            if ( isset( $hierarchy_terms[2] ) ) {
+                $sub_family_term = $hierarchy_terms[2];
+                $family_code = get_field( 'family_code', $this->taxonomy . '_' . $sub_family_term->term_id );
+                $result['sub_family_code'] = $family_code ? $family_code : '';
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get the depth level of a term (0 = root, 1 = child, 2 = grandchild)
+     */
+    private function get_term_depth( $term ) {
+        $depth = 0;
+        $current_term = $term;
+
+        while ( $current_term && $current_term->parent ) {
+            $depth++;
+            $current_term = get_term( $current_term->parent, $this->taxonomy );
+        }
+
+        return $depth;
     }
 
     /**
@@ -757,9 +708,9 @@ class Puk_Product_Importer_Exporter {
             }
         }
         
-        // Verify 'title' column exists immediately
-        if ( ! in_array( 'title', $headers ) ) {
-            $msg = "CRITICAL ERROR: 'Title' column missing in CSV. Found headers: " . implode( ', ', $headers );
+        // Verify 'product title' column exists immediately
+        if ( ! in_array( 'product title', $headers ) && ! in_array( 'title', $headers ) ) {
+            $msg = "CRITICAL ERROR: 'Product Title' column missing in CSV. Found headers: " . implode( ', ', $headers );
             error_log( $msg );
             // Show this error immediately and stop
             add_action( 'admin_notices', function() use ( $msg ) {
@@ -812,16 +763,16 @@ class Puk_Product_Importer_Exporter {
             $item = array_combine( $headers, $row );
 
             // Prepare Post Data
-            $import_uid = isset( $item['import uid'] ) ? trim( $item['import uid'] ) : '';
-            $post_title = isset( $item['title'] ) ? $item['title'] : '';
-            
+            $sku = isset( $item['sku'] ) ? trim( $item['sku'] ) : ( isset( $item['prod__sku'] ) ? trim( $item['prod__sku'] ) : '' );
+            $post_title = isset( $item['product title'] ) ? $item['product title'] : ( isset( $item['title'] ) ? $item['title'] : '' );
+
             // Allow "0" as a title, so use strict check for empty string
             if ( $post_title === '' ) {
-                // Check if 'title' column even exists
-                if ( ! in_array( 'title', $headers ) ) {
-                    $msg = "Row $row_count: 'title' column missing. Available columns: " . implode( ', ', $headers );
+                // Check if 'product title' or 'title' column even exists
+                if ( ! in_array( 'product title', $headers ) && ! in_array( 'title', $headers ) ) {
+                    $msg = "Row $row_count: 'Product Title' column missing. Available columns: " . implode( ', ', $headers );
                 } else {
-                    $msg = "Row $row_count: Title value is empty.";
+                    $msg = "Row $row_count: Product Title value is empty.";
                     // Debug: Log the actual item to see what's in it
                     error_log( "Row $row_count Data Dump: " . print_r( $item, true ) );
                 }
@@ -830,17 +781,16 @@ class Puk_Product_Importer_Exporter {
                 continue; // Skip if no title
             }
 
-            // Check if post exists by _import_uid
+            // Check if post exists by SKU
             $existing_post_id = 0;
-            if ( ! empty( $import_uid ) ) {
-                $existing_post_id = $this->get_post_by_import_uid( $import_uid );
+            if ( ! empty( $sku ) ) {
+                $existing_post_id = $this->get_post_by_sku( $sku );
             }
 
             $post_args = [
                 'post_type'    => $this->post_type,
                 'post_status'  => isset( $item['status'] ) ? $item['status'] : 'publish',
                 'post_title'   => $post_title,
-                'post_content' => isset( $item['content'] ) ? wp_kses_post( $item['content'] ) : '',
             ];
 
             // Insert or Update Post
@@ -861,14 +811,30 @@ class Puk_Product_Importer_Exporter {
             }
             
             error_log( "Row $row_count: Post created/updated successfully. ID: $new_post_id" );
+            
+            // Log if SKU was provided
+            if ( ! empty( $sku ) ) {
+                error_log( "Row $row_count: Using SKU $sku for post $new_post_id" );
+            }
 
-            // Update or set the _import_uid
-            if ( ! empty( $import_uid ) ) {
-                update_field( '_import_uid', $import_uid, $new_post_id );
+            // Update or set the prod__sku
+            if ( ! empty( $sku ) ) {
+                update_field( 'prod__sku', $sku, $new_post_id );
             }
 
             // --- Handle Taxonomy: Product Family (Hierarchical) ---
-            if ( ! empty( $item['product family'] ) ) {
+            // Support both old format (single column) and new format (three columns)
+            $main_category = isset( $item['main category'] ) ? trim( $item['main category'] ) : '';
+            $family = isset( $item['family'] ) ? trim( $item['family'] ) : '';
+            $sub_family = isset( $item['sub family'] ) ? trim( $item['sub family'] ) : '';
+            $sub_family_code = isset( $item['sub family code'] ) ? trim( $item['sub family code'] ) : '';
+
+            // If new format columns exist, use them
+            if ( ! empty( $main_category ) || ! empty( $family ) || ! empty( $sub_family ) ) {
+                $this->set_taxonomy_by_levels( $new_post_id, $main_category, $family, $sub_family, $sub_family_code, $this->taxonomy );
+            }
+            // Fallback to old format for backward compatibility
+            elseif ( ! empty( $item['product family'] ) ) {
                 $this->set_hierarchical_terms( $new_post_id, $item['product family'], $this->taxonomy );
             }
 
@@ -1177,17 +1143,70 @@ class Puk_Product_Importer_Exporter {
                     update_field( $field['name'], $value, $post_id );
                 }
                 break;
-                
+
             case 'wysiwyg':
                 // Store HTML content with sanitization
                 update_field( $field['name'], wp_kses_post( $value ), $post_id );
                 break;
-                
+
+            case 'taxonomy':
+                // Handle taxonomy fields - convert term name to term ID
+                // Determine taxonomy based on field name
+                $taxonomy = '';
+                if ( $field['name'] === 'pro_finish_color' ) {
+                    $taxonomy = 'finish-color';
+                } elseif ( $field['name'] === 'pro_dimming' ) {
+                    $taxonomy = 'features';
+                } elseif ( $field['name'] === 'prod_acc_in__terms' || $field['name'] === 'prod_acc_not_in__terms' ) {
+                    $taxonomy = 'accessories';
+                }
+
+                if ( ! empty( $taxonomy ) ) {
+                    // Value can be term name or comma-separated term names
+                    $term_names = array_map( 'trim', explode( ',', $value ) );
+                    $term_ids = [];
+
+                    foreach ( $term_names as $term_name ) {
+                        if ( empty( $term_name ) ) continue;
+
+                        // Try to find term by name
+                        $term = get_term_by( 'name', $term_name, $taxonomy );
+
+                        // If not found by name, try finding by code (tax_acc__code) for accessories
+                        if ( ! $term && $taxonomy === 'accessories' ) {
+                            $term = $this->get_term_by_code( $term_name, $taxonomy );
+                        }
+
+                        if ( $term ) {
+                            $term_ids[] = $term->term_id;
+                        } else {
+                            error_log( "Taxonomy import: Term '$term_name' not found in taxonomy '$taxonomy' for field '{$field['name']}'" );
+                        }
+                    }
+
+                    if ( ! empty( $term_ids ) ) {
+                        // Store single ID if only one, otherwise array
+                        $value_to_store = count( $term_ids ) === 1 ? $term_ids[0] : $term_ids;
+                        update_field( $field['name'], $value_to_store, $post_id );
+                        error_log( "Taxonomy import: Successfully imported term(s) for '{$field['name']}': " . print_r( $value_to_store, true ) );
+                    }
+                }
+                break;
+
+            case 'true_false':
+                // Handle true/false values - accept 1/0, true/false, yes/no
+                $bool_value = false;
+                if ( in_array( strtolower( $value ), [ '1', 'true', 'yes' ] ) ) {
+                    $bool_value = true;
+                }
+                update_field( $field['name'], $bool_value, $post_id );
+                break;
+
             case 'select':
                 // Store select value as-is
                 update_field( $field['name'], $value, $post_id );
                 break;
-                
+
             case 'text':
             case 'textarea':
             default:
@@ -1247,6 +1266,107 @@ class Puk_Product_Importer_Exporter {
         if ( ! empty( $term_ids ) ) {
             wp_set_object_terms( $post_id, $term_ids, $taxonomy );
         }
+    }
+
+    /**
+     * Set taxonomy terms by individual levels (Main category, Family, Sub Family)
+     */
+    private function set_taxonomy_by_levels( $post_id, $main_category, $family, $sub_family, $sub_family_code, $taxonomy ) {
+        $parent_id = 0;
+        $final_term_id = 0;
+        $sub_family_term = null;
+
+        // Level 0: Main category
+        if ( ! empty( $main_category ) ) {
+            $term = $this->get_or_create_term( $main_category, $taxonomy, 0 );
+            if ( $term ) {
+                $parent_id = $term->term_id;
+                $final_term_id = $term->term_id;
+            }
+        }
+
+        // Level 1: Family
+        if ( ! empty( $family ) && $parent_id > 0 ) {
+            $term = $this->get_or_create_term( $family, $taxonomy, $parent_id );
+            if ( $term ) {
+                $parent_id = $term->term_id;
+                $final_term_id = $term->term_id;
+            }
+        }
+
+        // Level 2: Sub Family
+        if ( ! empty( $sub_family ) && $parent_id > 0 ) {
+            $term = $this->get_or_create_term( $sub_family, $taxonomy, $parent_id );
+            if ( $term ) {
+                $final_term_id = $term->term_id;
+                $sub_family_term = $term;
+            }
+        }
+
+        // Update Sub Family Code ACF field if provided
+        if ( $sub_family_term && ! empty( $sub_family_code ) ) {
+            $term_identifier = $taxonomy . '_' . $sub_family_term->term_id;
+
+            // Try update_field first (ACF function)
+            $result = update_field( 'family_code', $sub_family_code, $term_identifier );
+
+            // Log the result
+            if ( $result ) {
+                error_log( "Import: Successfully set family_code '$sub_family_code' for term '{$sub_family_term->name}' (ID: {$sub_family_term->term_id}, Identifier: $term_identifier)" );
+            } else {
+                error_log( "Import: WARNING - update_field returned false for family_code '$sub_family_code' on term '{$sub_family_term->name}' (ID: {$sub_family_term->term_id})" );
+
+                // Fallback: try using term meta directly
+                $meta_result = update_term_meta( $sub_family_term->term_id, 'family_code', $sub_family_code );
+                if ( $meta_result ) {
+                    error_log( "Import: Fallback successful - used update_term_meta for family_code" );
+                } else {
+                    error_log( "Import: ERROR - Both update_field and update_term_meta failed for family_code" );
+                }
+            }
+        }
+
+        // Assign the deepest term to the post
+        if ( $final_term_id > 0 ) {
+            wp_set_object_terms( $post_id, [ $final_term_id ], $taxonomy );
+        }
+    }
+
+    /**
+     * Get or create a term with a specific parent
+     */
+    private function get_or_create_term( $term_name, $taxonomy, $parent_id ) {
+        // Try to find existing term with matching name and parent
+        $existing_term = get_term_by( 'name', $term_name, $taxonomy );
+
+        if ( $existing_term && $existing_term->parent == $parent_id ) {
+            return $existing_term;
+        }
+
+        // If term exists but has different parent, search for one with correct parent
+        if ( $existing_term ) {
+            $args = [
+                'taxonomy'   => $taxonomy,
+                'name'       => $term_name,
+                'parent'     => $parent_id,
+                'hide_empty' => false,
+            ];
+            $terms = get_terms( $args );
+
+            if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+                return $terms[0];
+            }
+        }
+
+        // Create new term
+        $new_term = wp_insert_term( $term_name, $taxonomy, [ 'parent' => $parent_id ] );
+
+        if ( is_wp_error( $new_term ) ) {
+            error_log( "Import Error: Failed to create term '$term_name' under parent $parent_id: " . $new_term->get_error_message() );
+            return null;
+        }
+
+        return get_term( $new_term['term_id'], $taxonomy );
     }
 
     /**
@@ -1343,17 +1463,17 @@ class Puk_Product_Importer_Exporter {
     }
 
     /**
-     * Get post ID by _import_uid ACF field
+     * Get post ID by prod__sku ACF field
      */
-    private function get_post_by_import_uid( $import_uid ) {
+    private function get_post_by_sku( $sku ) {
         $args = [
             'post_type'      => $this->post_type,
             'posts_per_page' => 1,
             'post_status'    => 'any',
             'meta_query'     => [
                 [
-                    'key'     => '_import_uid',
-                    'value'   => $import_uid,
+                    'key'     => 'prod__sku',
+                    'value'   => $sku,
                     'compare' => '='
                 ]
             ],
@@ -1362,6 +1482,24 @@ class Puk_Product_Importer_Exporter {
 
         $posts = get_posts( $args );
         return ! empty( $posts ) ? $posts[0] : 0;
+    }
+    /**
+     * Get term by tax_acc__code meta field
+     */
+    private function get_term_by_code( $code, $taxonomy ) {
+        $terms = get_terms([
+            'taxonomy'   => $taxonomy,
+            'hide_empty' => false,
+            'meta_query' => [
+                [
+                    'key'     => 'tax_acc__code',
+                    'value'   => $code,
+                    'compare' => '='
+                ]
+            ]
+        ]);
+
+        return ! empty( $terms ) && ! is_wp_error( $terms ) ? $terms[0] : false;
     }
 
 }
