@@ -19,3 +19,7 @@ include_once( $inc_path . 'taxonomy_import_export_helper.php' );
 include_once( $inc_path . 'finish_color_import_export_helper.php' );
 include_once( $inc_path . 'accessories_import_export_helper.php' );
 include_once( $inc_path . 'features_import_export_helper.php' );
+
+// Bulk Image Assign Module
+include_once( __DIR__ . '/../image-assign/image_assign_dashboard.php' );
+include_once( __DIR__ . '/../image-assign/image_assign_helper.php' );

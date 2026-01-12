@@ -8,16 +8,11 @@
 
                         <?php
                           // Get current term
-                          $terms = wp_get_post_terms(get_the_ID(), 'products-family');
+                          $terms = wp_get_post_terms(get_the_ID(), 'product-family');
 
-
-                        //   echo '<pre>' ; 
-                        //   print_r($terms) ; 
-
-
-                          $current_term = $terms[0];
-                          $term_id      = $current_term->term_id;
-                          $taxonomy     = $current_term->taxonomy;
+                          $current_term = !empty($terms) && !is_wp_error($terms) ? $terms[0] : null;
+                          $term_id  = $current_term->term_id ?? null;
+                          $taxonomy = $current_term->taxonomy ?? null; 
                           $ancestors = get_ancestors($term_id, $taxonomy);
                           $ancestors = array_reverse($ancestors);
                           echo '<ul>';
@@ -28,7 +23,10 @@
                                   echo '<li><a href="' . get_term_link($ancestor) . '">' . esc_html($ancestor->name) . '</a></li>';
                               }
                           }
-                          echo '<li><a href="' . get_term_link($current_term) . '">' . esc_html($current_term->name) . '</a></li>';
+                          if(!empty($current_term)){
+                                echo '<li><a href="' . get_term_link($current_term) . '">' . esc_html($current_term->name) . '</a></li>';
+                          }
+                         
                           echo '<li>' . get_the_title() . '</li>';
                           echo '</ul>'; 
                         ?>
@@ -39,15 +37,12 @@
             </div>
         </div>
     </section>
-    
     <?php 
-
-      $parent_term_id = $ancestors[2] ; 
-      $designed_by     =  get_field('pf_designed_by', 'products-family_' . $parent_term_id);
-      $subfamily_desc  =  get_field('pf_subfam_desc', 'products-family_' . $parent_term_id);
-      $subsub_family_gallary =  get_field('pf_subsub_fam_tch_feturs', 'products-family_' . $term_id); 
-      $site_plachlder_img = get_field('site_plachlder_img','option') ;
-
+        $parent_term_id = !empty($ancestors[2]) ? $ancestors[2] : null;
+        $designed_by = $parent_term_id ? get_field('pf_designed_by', 'product-family_' . $parent_term_id) : null;
+        $subfamily_desc = $parent_term_id ? get_field('pf_subfam_desc', 'product-family_' . $parent_term_id) : null;
+        $subsub_family_gallary = $parent_term_id ? get_field('tax_sub_family_features', 'product-family_' . $parent_term_id) : null;
+        $site_plachlder_img = get_field('site_plachlder_img', 'option') ?: null;
     ?>
 
     <section class="pd-title-main">
@@ -57,10 +52,12 @@
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                     <div class="title-box-flex">
                         <div class="title-box">
-                            <h1 aria-label="product title"><?php echo esc_html($current_term->name); ?></h1>
-                                <?php if ( $designed_by ) : ?>
-                                    <h2 aria-label="product sub title">Designed by <br> <?php echo esc_html($designed_by); ?></h2>   
-                                <?php endif; ?>
+                            <?php if(!empty($current_term)) : ?>
+                              <h1 aria-label="product title"><?php echo esc_html($current_term->name); ?></h1>
+                            <?php endif; ?>
+                            <?php if ( $designed_by ) : ?>
+                                <h2 aria-label="product sub title">Designed by <br> <?php echo esc_html($designed_by); ?></h2>   
+                            <?php endif; ?>
                         </div>
                         <div class="description-box">
                             <article>
@@ -71,25 +68,28 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <div class="project-slider-wrapper title-box-flex">
-                        <div class="swiper project-slider">
-                            <div class="swiper-wrapper">
-                                <?php
-                                    $pro_gallary = get_field('pro_gallary') ; 
-                                    foreach($pro_gallary as $pro_image){ 
-                                    ?> 
-                                    <div class="swiper-slide">
-                                        <div class="image-box">
-                                            <img src="<?php echo $pro_image; ?>" alt="Wall Mounting 1" />
+
+                <?php $pro_gallary = get_field('pro_gallary') ; 
+                if(!empty($pro_gallary)){ ?>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="project-slider-wrapper title-box-flex">
+                            <div class="swiper project-slider">
+                                <div class="swiper-wrapper">
+                                    <?php
+                                        
+                                        foreach($pro_gallary as $pro_image){ 
+                                        ?> 
+                                        <div class="swiper-slide">
+                                            <div class="image-box">
+                                                <img src="<?php echo $pro_image; ?>" alt="Wall Mounting 1" />
+                                            </div>
                                         </div>
-                                    </div>
-                                <?php } ?> 
+                                    <?php } ?> 
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
+                <?php   }?>
             </div>
 
         </div>
@@ -123,98 +123,155 @@
                                 $pro_cable_gland = get_field('pro_cable_gland'); 
                                 $pro_pwr_cble = get_field('pro_pwr_cble'); 
                                 $pro_grs_weight = get_field('pro_grs_weight'); 
-                                $pro_mesr_img =  get_field('pf_subfam_tech_drawing', 'products-family_' . $parent_term_id);
+                                $pro_mesr_img =  get_field('pf_subfam_tech_drawing', 'product-family_' . $parent_term_id);
                                 
                                 // print_r($ancestors) ; 
                         ?>
-                            <li>
-                                <span>Wattage</span>
-                                <p> <?php echo $wattage; ?> </p>
-                            </li>
-                            <li>
-                                <span>CCT</span>
-                                <p> <?php echo $cct; ?> </p>
-                            </li>
-                            <li>
-                                <span>Beam Angle</span>
-                                <p> <?php echo $beam_angle; ?> </p>
-                            </li>
-                            <li>
-                                <span>Lumens</span>
-                                <p> <?php echo $lumens; ?> </p>
-                            </li>
+                         <?php if( !empty($wattage) ) : ?> 
+                                <li>
+                                    <span>Wattage</span>
+                                    <p> <?php echo $wattage; ?> </p>
+                                </li>
+                                <?php endif; ?>
 
-                            <li class="finish_li">
-                                <span>Finish</span>
-                                <p> <?php echo $finish; ?> </p>
-                            </li>
-                            <li>
-                                <span>IP Rating </span>
-                                <p> <?php echo $iprating; ?> </p>
-                            </li>
-                            <li>
-                                <span> IK Rating </span>
-                                <p> <?php echo $ikrating; ?> </p>
-                            </li>
-                            <li>
-                                <span> Material </span>
-                                <p> <?php echo $pro_material; ?> </p>
-                            </li>
-                            <li>
-                                <span> Coating </span>
-                                <p> <?php echo $pro_coating; ?> </p>
-                            </li>
-                            <li>
-                                <span> Light source </span>
-                                <p> <?php echo $pro_light_source; ?> </p>
-                            </li>
-                            <li>
-                                <span> Screws </span>
-                                <p> <?php echo $pro_screws; ?> </p>
-                            </li>
-                            <li>
-                                <span> Transformer </span>
-                                <p> <?php echo $pro_transformer; ?> </p>
-                            </li>
-                            <li> 
-                                <span> Gasket </span>
-                                <p>  <?php echo $pro_gasket; ?> </p>
-                            </li>
-                            <li>
-                                <span> Glass </span> 
-                                <p> <?php echo $pro_glass; ?> </p>
-                            </li>
-                            <li>
-                                <span> Cable gland </span>
-                                <p> <?php echo $pro_cable_gland; ?> </p>
-                            </li>
-                            <li>
-                                <span> Power cable </span>
-                                <p><?php echo $pro_pwr_cble; ?> </p>
-                            </li>
-                            <li>
-                                <span> Gross weight </span>
-                                <p> <?php echo $pro_grs_weight; ?></p>
-                            </li> 
+                                <?php if( !empty($cct) ) : ?>
+                                <li>
+                                    <span>CCT</span>
+                                    <p> <?php echo $cct; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($beam_angle) ) : ?>
+                                <li>
+                                    <span>Beam Angle</span>
+                                    <p> <?php echo $beam_angle; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($lumens) ) : ?>
+                                <li>
+                                    <span>Lumens</span>
+                                    <p> <?php echo $lumens; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($finish) ) : ?>
+                                <li class="finish_li">
+                                    <span>Finish</span>
+                                    <p> <?php echo $finish; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($iprating) ) : ?>
+                                <li>
+                                    <span>IP Rating </span>
+                                    <p> <?php echo $iprating; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($ikrating) ) : ?>
+                                <li>
+                                    <span> IK Rating </span>
+                                    <p> <?php echo $ikrating; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($pro_material) ) : ?>
+                                <li>
+                                    <span> Material </span>
+                                    <p> <?php echo $pro_material; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($pro_coating) ) : ?>
+                                <li>
+                                    <span> Coating </span>
+                                    <p> <?php echo $pro_coating; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($pro_light_source) ) : ?>
+                                <li>
+                                    <span> Light source </span>
+                                    <p> <?php echo $pro_light_source; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($pro_screws) ) : ?>
+                                <li>
+                                    <span> Screws </span>
+                                    <p> <?php echo $pro_screws; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($pro_transformer) ) : ?>
+                                <li>
+                                    <span> Transformer </span>
+                                    <p> <?php echo $pro_transformer; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($pro_gasket) ) : ?>
+                                <li> 
+                                    <span> Gasket </span>
+                                    <p>  <?php echo $pro_gasket; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($pro_glass) ) : ?>
+                                <li>
+                                    <span> Glass </span> 
+                                    <p> <?php echo $pro_glass; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($pro_cable_gland) ) : ?>
+                                <li>
+                                    <span> Cable gland </span>
+                                    <p> <?php echo $pro_cable_gland; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($pro_pwr_cble) ) : ?>
+                                <li>
+                                    <span> Power cable </span>
+                                    <p><?php echo $pro_pwr_cble; ?> </p>
+                                </li>
+                                <?php endif; ?>
+
+                                <?php if( !empty($pro_grs_weight) ) : ?>
+                                <li>
+                                    <span> Gross weight </span>
+                                    <p> <?php echo $pro_grs_weight; ?></p>
+                                </li>
+                                <?php endif; ?>
                         </ul>
                     </div>
 
+                    <?php if( !empty($subsub_family_gallary) ) : ?>   
                     <div class="pd-single-data-icns">
-                        <?php foreach($subsub_family_gallary as $subsub_family_img){ ?>
-                            <div class="icon_item">
-                                <img src="<?php echo $subsub_family_img ; ?>" alt="technical features" />
-                            </div>
-                        <?php } ?>
+                        <?php
+                            foreach ( $subsub_family_gallary as $term_id ) {
+                            $image = get_field( 'tax_featured__icon', 'features_' . $term_id );
+                            if ( $image ) {
+                               $image_alt = is_array($image) && !empty($image['alt']) ? $image['alt'] : 'technical features';
+                            ?>
+                                <div class="icon_item">
+                                    <img src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr($image_alt); ?>">
+                                </div>
+                            <?php
+                            }
+                        } ?> 
                     </div>
+                    <?php endif; ?>
+
 
                     <?php 
                       $pd_alavlbl = get_field('pd_alavlbl_select_product');  
                       $pro_sub_gallary = get_field('pro_sub_gallary');  
                       $pro_remote_drv_slctn = get_field('pro_remote_drv_slctn');   
-
-
-                    //   echo '<pre>' ; 
-                    //   print_r($pd_alavlbl) ; 
+                      // Only show section if pro_remote_drv_slctn has data
+                      if(!empty($pd_alavlbl) ) : 
 
                     ?>
                     <!-- also available color  -->
@@ -225,68 +282,81 @@
                         <div class="available-colors-list">
                             <?php foreach($pd_alavlbl as $pd_alavaible){ 
 
-                                
-                                $product_id = $pd_alavaible ; 
-                                $product_name = get_the_title($product_id);
-                                $product_link = get_the_permalink($product_id);
-                                $color = get_post_meta($product_id, 'pro_finish_color', true);
-                                $code = get_post_meta($product_id, 'pro_finish', true);
-
+                                $product_id = $pd_alavaible; 
+                                $product_name = $product_id ? get_the_title($product_id) : null;
+                                $product_link = $product_id ? get_the_permalink($product_id) : null;
+                                $product_sku = $product_id ? get_post_meta($product_id, 'prod__sku', true) : null;
+                                $color_id = $product_id ? get_post_meta($product_id, 'pro_finish_color', true) : null;
+                                $color_term = ($color_id && !is_wp_error(get_term($color_id, 'finish-color'))) ? get_term($color_id, 'finish-color') : null;
+                                $color_name = $color_term ? $color_term->name : null;
+                                $color_img = $color_id ? get_field('tax_finish_color__img', 'finish-color_' . $color_id) : null;
 
                             ?>     
                             <!-- Single Item -->
                             <div class="color-item">
-                                <span class="color-dot" style="background:<?php echo $color; ?>;"></span>
-                                <span class="color-name"><?php echo $code; ?></span>
-                                <span class="product-code"> <a href="<?php echo $product_link; ?>"><?php echo $product_name; ?></a> </span>
+                                <span class="color-dot">
+                                    <img src="<?php echo $color_img; ?>" alt="">
+                                </span>
+                                <span class="color-name"><?php echo $color_name; ?></span>
+                                <span class="product-code"> <a href="<?php echo $product_link; ?>"><?php echo $product_sku; ?></a> </span>
                             </div>
                             <?php } ?>
                         </div>
                     </div>
 
+                    <?php endif; ?>
+
+
                     <!-- sub gallary  -->
+                    <?php if( !empty($pro_sub_gallary)) : ?>
                     <div class="pd-single-data-sbglry">
                         <?php foreach($pro_sub_gallary as $pro_sub_gallary_img){ ?>
                             <div class="single-sf">
-                                
-                                    <img src="<?php echo $pro_sub_gallary_img ; ?>" alt="sf1.jpg" />
-                          
+                                <img src="<?php echo $pro_sub_gallary_img ; ?>" alt="sf1.jpg" />
                             </div>
                         <?php } ?>
                     </div>
+                    <?php endif; ?>
 
-                    <!-- driver section  -->
-                    <div class="pd-single-data-driver-selection">
-                        <h3 class="ds-title">REMOTE DRIVER SELECTION</h3>
-                        <div class="table-responsive">
-                            <table class="table">
+                    <?php  if(!empty($pro_remote_drv_slctn) ) :  ?>
+                        <!-- driver section  -->
+                        <div class="pd-single-data-driver-selection">
+                            <h3 class="ds-title">REMOTE DRIVER SELECTION</h3>
+                            <div class="table-responsive">
+                                <table class="table">
 
-                                <tbody>
+                                        <tbody>
+                                            <?php foreach($pro_remote_drv_slctn as $pro_remote_slctn){  
+                                                $pro_remote_meanwell = $pro_remote_slctn['pro_remote_meanwell'] ; 
+                                                $pro_remote_lpv      = $pro_remote_slctn['pro_remote_lpv'] ; 
+                                                $pro_remote_volt     = $pro_remote_slctn['pro_remote_volt'] ; 
+                                                $pro_remote_watt     = $pro_remote_slctn['pro_remote_watt'] ; 
+                                                $pro_remote_ip       = $pro_remote_slctn['pro_remote_ip'] ; 
+                                                $pro_remote_min_max  = $pro_remote_slctn['pro_remote_min_max'] ; 
+                                            ?>
+                                                <tr>
+                                                    <td><?php echo $pro_remote_meanwell; ?></td>
+                                                    <td><?php echo $pro_remote_lpv; ?></td>
+                                                    <td><?php echo $pro_remote_volt; ?></td>
+                                                    <td><?php echo $pro_remote_watt; ?></td>
+                                                    <td><?php echo $pro_remote_ip; ?></td>
+                                                    <td><?php echo $pro_remote_min_max; ?></td>
+                                                </tr> 
+                                            <?php } ?>
+                                        </tbody>
+                                </table>
 
-                                <?php foreach($pro_remote_drv_slctn as $pro_remote_slctn){  
-                                    $pro_remote_meanwell = $pro_remote_slctn['pro_remote_meanwell'] ; 
-                                    $pro_remote_lpv      = $pro_remote_slctn['pro_remote_lpv'] ; 
-                                    $pro_remote_volt     = $pro_remote_slctn['pro_remote_volt'] ; 
-                                    $pro_remote_watt     = $pro_remote_slctn['pro_remote_watt'] ; 
-                                    $pro_remote_ip       = $pro_remote_slctn['pro_remote_ip'] ; 
-                                    $pro_remote_min_max  = $pro_remote_slctn['pro_remote_min_max'] ; 
-                                ?>
-                                    <tr>
-                                        <td><?php echo $pro_remote_meanwell; ?></td>
-                                        <td><?php echo $pro_remote_lpv; ?></td>
-                                        <td><?php echo $pro_remote_volt; ?></td>
-                                        <td><?php echo $pro_remote_watt; ?></td>
-                                        <td><?php echo $pro_remote_ip; ?></td>
-                                        <td><?php echo $pro_remote_min_max; ?></td>
-                                    </tr> 
-                                 <?php } ?>
-                                </tbody>
-                            </table>
+
+                            </div>
                         </div>
-                    </div>
+                    <?php endif; ?>
+
+
                 </div>
 
                 <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+
+                <?php  if(!empty($pro_mesr_img) ) :  ?> 
                     <div class="right-image-box single-techdraw">
                         <?php if($pro_mesr_img){ ?>
                             <img src="<?php echo $pro_mesr_img ;?>" alt="Wall Mounting 2" />
@@ -294,11 +364,20 @@
                             <img src="<?php echo $site_plachlder_img ;?>" alt="Wall Mounting 2" /> 
                        <?php }?>
                     </div>
+                <?php endif; ?>
                 </div>
             </div>
         </div>
     </section>
 
+
+        <?php 
+            $pro_inte_access_stitle = get_field('prod_acc_in__title');  
+            $pro_inte_access_sdesc = get_field('prod_acc_in__desc');  
+            $pro_inte_access_rept = get_field('prod_acc_in__terms');   
+        ?>
+
+    <?php  if(!empty($pro_inte_access_rept) ) :  ?>
 
     <section class="integrated-accessories-main">
         <div class="container-fluid">
@@ -310,17 +389,6 @@
                 </div>
             </div>
         </div>
-
-        <?php $get_mod = get_field('prod_acc_not_in__terms');
-        print_r($get_mod);
-        ?>
-
-
-        <?php 
-            $pro_inte_access_stitle = get_field('pro_inte_access_stitle');  
-            $pro_inte_access_sdesc = get_field('pro_inte_access_sdesc');  
-            $pro_inte_access_rept = get_field('pro_inte_access_rept');   
-        ?>
 
 
         <div class="accessories-bg" style="background: rgba(217, 217, 217, 0.25);">
@@ -338,19 +406,28 @@
                     <div class="col-sm-12 col-md-10 col-lg-10">
                         <div class="accessories-grid-parent">
 
-                        <?php foreach($pro_inte_access_rept as $pro_inte_access_item){ 
-                            $image    =  $pro_inte_access_item['pro_inte_access_rept_img'];
-                            $title    =  $pro_inte_access_item['pro_inte_access_rept_title'];
-                            $subtitle =  $pro_inte_access_item['pro_inte_access_rept_subtitle'];
-                            $desc     =  $pro_inte_access_item['pro_inte_access_rept_desc']; 
+                        <?php foreach($pro_inte_access_rept as $term_id){ 
+
+                            // Get term object
+                            $term = get_term( $term_id, 'accessories' );
+                            if ( ! $term || is_wp_error( $term ) ) {
+                                continue;
+                            }
+
+                            $code        = get_field( 'tax_acc__code', 'accessories_' . $term_id );
+                            $is_featured = get_field( 'tax_acc_ft__type', 'accessories_' . $term_id );
+                            $label       = get_field( 'tax_acc_integ__label', 'accessories_' . $term_id );
+                            $image       = get_field( 'tax_acc_ft__img', 'accessories_' . $term_id );
+                            $title       = $term->name; 
+                            $desc       = $term->description; 
                         ?> 
                             <div class="single-grid">
                                 <div class="image-box">
                                     <img src="<?php echo $image; ?>" alt="" />
                                 </div>
                                 <div class="content-box">
-                                    <h5><?php echo $title; ?> </h5>
-                                    <h6><?php echo $subtitle; ?></h6>
+                                    <h5><?php echo $label; ?> </h5>
+                                    <h6><?php echo $title; ?></h6>
                                     <p> <?php echo $desc; ?> </p>
                                 </div>
                             </div>
@@ -363,13 +440,15 @@
         </div>
     </section>
 
+     <?php endif; ?>
+
     <section class="integrated-accessories-main">
 
     
         <?php 
-            $pro_not_incld = get_field('pro_not_incld');   
+            $pro_not_incld = get_field('prod_acc_not_in__terms'); 
+            if(!empty($pro_inte_access_rept) ) :  
         ?>
-
         <div class="accessories-bg" style="background: rgba(192, 186, 176, 0.40);">
             <div class="container-fluid">
                 <div class="row">
@@ -387,11 +466,25 @@
                     <div class="col-sm-12 col-md-10 col-lg-10">
                         <div class="accessories-grid-parent">
 
-                           <?php foreach($pro_not_incld as $pro_not_incld_item){ 
-                            $image    =  $pro_not_incld_item['pro_not_incld_img'];
-                            $title    =  $pro_not_incld_item['pro_not_incld_title'];
-                            $subtitle =  $pro_not_incld_item['pro_not_incld_subtitle'];
-                            $desc     =  $pro_not_incld_item['pro_not_incld_desc']; 
+                           <?php 
+                        //    print_r($pro_not_incld) ; 
+
+                           
+                           foreach($pro_not_incld as $term_id){ 
+                        
+                             // Get term object
+                            $term = get_term( $term_id, 'accessories' );
+                            if ( ! $term || is_wp_error( $term ) ) {
+                                continue;
+                            }
+
+                            $code        = get_field( 'tax_acc__code', 'accessories_' . $term_id );
+                            $is_featured = get_field( 'tax_acc_ft__type', 'accessories_' . $term_id );
+                            $label       = get_field( 'tax_acc_integ__label', 'accessories_' . $term_id );
+                            $image       = get_field( 'tax_acc_ft__img', 'accessories_' . $term_id );
+                            $title       = $term->name; 
+                            $desc       = $term->description; 
+
                         ?> 
 
                             <div class="single-grid">
@@ -399,8 +492,8 @@
                                     <img src="<?php echo $image ; ?>" alt="Wall Mounting 3" />
                                 </div>
                                 <div class="content-box">
-                                    <h5><?php echo $title ; ?></h5>
-                                    <h6><?php echo $subtitle ; ?></h6>
+                                    <h5><?php echo $label ; ?></h5>
+                                    <h6><?php echo $title ; ?></h6>
                                     <p><?php echo $desc ; ?></p> 
                                 </div>
                             </div>
@@ -412,6 +505,9 @@
                 </div>
             </div>
         </div>
+        <?php endif; ?>
+
+
     </section>
 
     <!-- light distribution start -->
@@ -468,6 +564,7 @@
                        
                     ?>
 
+                      <?php if( !empty($pro_dwnld_ltd_files) ) : ?>
                         <div class="single-download">
                             <a href="<?php echo $pro_dwnld_ltd_files; ?>" download>
                                 <div class="icon">
@@ -476,6 +573,9 @@
                                 <div class="text">Data Sheet</div>
                             </a>
                         </div>
+                        <?php endif; ?>
+
+                        <?php if( !empty($pro_dwnld_instructions) ) : ?>
                         <div class="single-download">
                             <a href="<?php echo $pro_dwnld_instructions; ?>" download>
                                 <div class="icon">
@@ -484,6 +584,9 @@
                                 <div class="text">Installation instructions</div>
                             </a>
                         </div>
+                        <?php endif; ?>
+
+                        <?php if( !empty($pro_dwnld_photometric) ) : ?>
                         <div class="single-download">
                             <a href="<?php echo $pro_dwnld_photometric; ?>" download>
                                 <div class="icon">
@@ -492,6 +595,9 @@
                                 <div class="text">Photometric Data</div>
                             </a>
                         </div>
+                        <?php endif; ?>
+
+                        <?php if( !empty($pro_dwnld_3dbim) ) : ?>
                         <div class="single-download">
                             <a href="<?php echo $pro_dwnld_3dbim; ?>" download>
                                 <div class="icon">
@@ -500,6 +606,9 @@
                                 <div class="text">3D BIM</div>
                             </a>
                         </div>
+                        <?php endif; ?>
+
+                        <?php if( !empty($pro_dwnld_provideo) ) : ?>
                         <div class="single-download">
                             <a href="<?php echo $pro_dwnld_provideo; ?>" >
                                 <div class="icon">
@@ -508,6 +617,9 @@
                                 <div class="text">Product Video</div>
                             </a>
                         </div>
+                        <?php endif; ?>
+
+                        <?php if( !empty($pro_dwnld_revit) ) : ?>
                         <div class="single-download">
                             <a href="<?php echo $pro_dwnld_revit; ?>" download>
                                 <div class="icon">
@@ -516,6 +628,7 @@
                                 <div class="text">Revit</div>
                             </a>
                         </div>
+                       <?php endif; ?>
 
                     </div>
                 </div>
@@ -578,7 +691,7 @@
                         <div class="swiper-wrapper">
 
                                   <?php
-                                        $taxonomy = 'products-family';
+                                        $taxonomy = 'product-family';
                                         $product_terms = get_the_terms(get_the_ID(), $taxonomy);
                                         if (!empty($product_terms) && !is_wp_error($product_terms)) {
 
@@ -601,7 +714,7 @@
                                                         echo '<a href="' . get_term_link($term) . '" title="' . $term->name . '">';
 
                                                         // term image via ACF or WP term meta
-                                                        $image =  get_field('pf_fet_img', 'products-family_' . $term->term_id);   
+                                                        $image =  get_field('pf_fet_img', 'product-family_' . $term->term_id);   
                                                         $image_url = $image ? $image : $site_plachlder_img;
 
                                                         echo '<div class="image-box">';

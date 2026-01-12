@@ -32,6 +32,11 @@ class Puk_Product_Importer_Exporter {
         // Handle Actions
         add_action( 'admin_init', [ $this, 'handle_export_request' ] );
         add_action( 'admin_init', [ $this, 'handle_import_request' ] );
+
+        // AJAX Batch Actions
+        add_action( 'wp_ajax_puk_get_export_count', [ $this, 'ajax_get_export_count' ] );
+        add_action( 'wp_ajax_puk_export_products_batch', [ $this, 'ajax_export_products_batch' ] );
+        add_action( 'wp_ajax_puk_import_products_batch', [ $this, 'ajax_import_products_batch' ] );
     }
 
     /**
@@ -291,43 +296,137 @@ class Puk_Product_Importer_Exporter {
             while ( $query->have_posts() ) {
                 $query->the_post();
                 $post_id = get_the_ID();
-
-                // Basic Post Data
-                $taxonomy_levels = $this->get_taxonomy_levels( $post_id );
-                $row = [
-                    get_field( 'prod__sku', $post_id ), // SKU
-                    html_entity_decode( get_the_title() ), // Product Title
-                    $this->get_acf_field_value( $post_id, ['name' => 'prod_is__new', 'type' => 'true_false'] ), // New
-                    $taxonomy_levels['main_category'], // Main category
-                    $taxonomy_levels['family'], // Family
-                    $taxonomy_levels['sub_family'], // Sub Family
-                    $taxonomy_levels['sub_family_code'], // Sub Family Code
-                ];
-
-                // Add ACF field values in the specified order
-                foreach ( $ordered_field_names as $field_name ) {
-                    foreach ( $this->acf_fields as $field ) {
-                        if ( $field['name'] === $field_name && empty( $field['parent_repeater'] ) ) {
-                            $field_value = $this->get_acf_field_value( $post_id, $field );
-                            // Ensure field_value is a string for CSV export
-                            if (is_array($field_value)) {
-                                $field_value = json_encode($field_value);
-                            }
-                            $row[] = $field_value;
-                            break;
-                        }
-                    }
-                }
-
-                // Add Status as the last column
-                $row[] = get_post_status();
-
+                $row = $this->get_product_export_row( $post_id, $ordered_field_names );
                 fputcsv( $output, $row );
             }
         }
 
         fclose( $output );
         exit();
+    }
+
+    /**
+     * AJAX: Get total product count for export
+     */
+    public function ajax_get_export_count() {
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) error_log( 'PUK AJAX: ajax_get_export_count initiated' );
+        
+        // Try multiple nonce keys for robustness
+        $nonce = isset( $_REQUEST['_ajax_nonce'] ) ? $_REQUEST['_ajax_nonce'] : ( isset( $_REQUEST['nonce'] ) ? $_REQUEST['nonce'] : '' );
+        
+        if ( ! wp_verify_nonce( $nonce, 'puk_export_nonce' ) ) {
+            error_log( 'PUK AJAX: Nonce verification failed for export count (Nonce: ' . $nonce . ')' );
+            wp_send_json_error( 'Security check failed' );
+        }
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            error_log( 'PUK AJAX: Permission denied for export count' );
+            wp_send_json_error( 'Permission denied' );
+        }
+
+        $count = wp_count_posts( $this->post_type );
+        $total = intval( $count->publish ) + intval( $count->draft ) + intval( $count->private ) + intval( $count->pending ) + intval( $count->future );
+        
+        $headers = [
+            'SKU', 'Product Title', 'New', 'Main category', 'Family', 'Sub Family', 'Sub Family Code'
+        ];
+        $ordered_field_names = $this->get_ordered_field_names();
+        foreach ( $ordered_field_names as $field_name ) {
+            foreach ( $this->acf_fields as $field ) {
+                if ( $field['name'] === $field_name && empty( $field['parent_repeater'] ) ) {
+                    $headers[] = $field['label'];
+                    break;
+                }
+            }
+        }
+        $headers[] = 'Status';
+
+        wp_send_json_success( [ 'total' => $total, 'headers' => $headers ] );
+    }
+
+    /**
+     * AJAX: Get a batch of products for export
+     */
+    public function ajax_export_products_batch() {
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) error_log( 'PUK AJAX: ajax_export_products_batch initiated' );
+
+        $nonce = isset( $_REQUEST['_ajax_nonce'] ) ? $_REQUEST['_ajax_nonce'] : ( isset( $_REQUEST['nonce'] ) ? $_REQUEST['nonce'] : '' );
+        if ( ! wp_verify_nonce( $nonce, 'puk_export_nonce' ) ) {
+            wp_send_json_error( 'Security check failed' );
+        }
+        
+        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Permission denied' );
+
+        $offset = isset( $_POST['offset'] ) ? intval( $_POST['offset'] ) : 0;
+        $posts_per_page = 20;
+
+        $args = [
+            'post_type'      => $this->post_type,
+            'posts_per_page' => $posts_per_page,
+            'offset'         => $offset,
+            'post_status'    => 'any',
+            'orderby'        => 'ID',
+            'order'          => 'ASC'
+        ];
+        $query = new WP_Query( $args );
+        $rows = [];
+        $ordered_field_names = $this->get_ordered_field_names();
+
+        if ( $query->have_posts() ) {
+            while ( $query->have_posts() ) {
+                $query->the_post();
+                $rows[] = $this->get_product_export_row( get_the_ID(), $ordered_field_names );
+            }
+        }
+
+        wp_send_json_success( [ 'rows' => $rows, 'count' => count( $rows ) ] );
+    }
+
+    /**
+     * Get a single product row for export
+     */
+    private function get_product_export_row( $post_id, $ordered_field_names ) {
+        $taxonomy_levels = $this->get_taxonomy_levels( $post_id );
+        $row = [
+            get_field( 'prod__sku', $post_id ), // SKU
+            html_entity_decode( get_the_title( $post_id ) ), // Product Title
+            $this->get_acf_field_value( $post_id, ['name' => 'prod_is__new', 'type' => 'true_false'] ), // New
+            $taxonomy_levels['main_category'], // Main category
+            $taxonomy_levels['family'], // Family
+            $taxonomy_levels['sub_family'], // Sub Family
+            $taxonomy_levels['sub_family_code'], // Sub Family Code
+        ];
+
+        foreach ( $ordered_field_names as $field_name ) {
+            foreach ( $this->acf_fields as $field ) {
+                if ( $field['name'] === $field_name && empty( $field['parent_repeater'] ) ) {
+                    $field_value = $this->get_acf_field_value( $post_id, $field );
+                    if ( is_array( $field_value ) ) {
+                        $field_value = json_encode( $field_value, JSON_UNESCAPED_UNICODE );
+                    }
+                    $row[] = $field_value;
+                    break;
+                }
+            }
+        }
+        $row[] = get_post_status( $post_id );
+        return $row;
+    }
+
+    /**
+     * Get ordered field names constant list
+     */
+    private function get_ordered_field_names() {
+        return [
+            'pro_wattage', 'pro_cct', 'pro_beam_angle', 'pro_lumens', 'pro_finish_color',
+            'pro_dimming', 'pro_iprating', 'pro_ikrating', 'pro_material', 'pro_coating',
+            'pro_light_source', 'pro_screws', 'pro_transformer', 'pro_gasket', 'pro_glass',
+            'pro_cable_gland', 'pro_pwr_cble', 'pro_grs_weight', 'pro_mesr_img',
+            'prod_acc_in__desc', 'prod_acc_in__terms', 'prod_acc_not_in__desc', 'prod_acc_not_in__terms',
+            'pro_remote_drv_slctn', 'pro_gallary', 'pro_sub_gallary', 'pd_alavlbl_select_product',
+            'pro_dwnld_ltd_files', 'pro_dwnld_instructions', 'pro_dwnld_revit', 'pro_dwnld_3dbim',
+            'pro_dwnld_photometric', 'pro_dwnld_provideo',
+        ];
     }
 
     /**
@@ -728,172 +827,13 @@ class Puk_Product_Importer_Exporter {
             $row_count++;
             $row = array_map( 'trim', $row );
             
-            // Debug: Log raw row data for first few rows
-            if ($row_count <= 3) {
-                error_log("PUK Import: Row $row_count raw data - " . print_r($row, true));
-                error_log("PUK Import: Row $row_count column count = " . count($row));
-            }
-            
             // Combine headers with row data
             if ( count( $headers ) !== count( $row ) ) {
-                $msg = "Row $row_count: Column count mismatch. Headers: " . count($headers) . ", Row: " . count($row);
-                
-                // Add more debug info for the first few errors
-                if (count($errors) < 3) {
-                    $msg .= " | Headers: " . implode(', ', array_slice($headers, 0, 5)) . "...";
-                    $msg .= " | Row data: " . implode(', ', array_slice($row, 0, 3)) . "...";
-                }
-                
-                error_log( $msg );
-                $errors[] = $msg;
-                
-                // Try to fix the row if it has fewer columns
-                if (count($row) < count($headers)) {
-                    // Pad the row with empty values
-                    $row = array_pad($row, count($headers), '');
-                    error_log("PUK Import: Padded row $row_count to match header count");
-                } elseif (count($row) > count($headers)) {
-                    // Truncate the row if it has too many columns
-                    $row = array_slice($row, 0, count($headers));
-                    error_log("PUK Import: Truncated row $row_count to match header count");
-                } else {
-                    continue; // Skip only if we couldn't fix it
-                }
+                $row = (count($row) < count($headers)) ? array_pad($row, count($headers), '') : array_slice($row, 0, count($headers));
             }
             $item = array_combine( $headers, $row );
 
-            // Prepare Post Data
-            $sku = isset( $item['sku'] ) ? trim( $item['sku'] ) : ( isset( $item['prod__sku'] ) ? trim( $item['prod__sku'] ) : '' );
-            $post_title = isset( $item['product title'] ) ? $item['product title'] : ( isset( $item['title'] ) ? $item['title'] : '' );
-
-            // Allow "0" as a title, so use strict check for empty string
-            if ( $post_title === '' ) {
-                // Check if 'product title' or 'title' column even exists
-                if ( ! in_array( 'product title', $headers ) && ! in_array( 'title', $headers ) ) {
-                    $msg = "Row $row_count: 'Product Title' column missing. Available columns: " . implode( ', ', $headers );
-                } else {
-                    $msg = "Row $row_count: Product Title value is empty.";
-                    // Debug: Log the actual item to see what's in it
-                    error_log( "Row $row_count Data Dump: " . print_r( $item, true ) );
-                }
-                error_log( $msg );
-                $errors[] = $msg;
-                continue; // Skip if no title
-            }
-
-            // Check if post exists by SKU
-            $existing_post_id = 0;
-            if ( ! empty( $sku ) ) {
-                $existing_post_id = $this->get_post_by_sku( $sku );
-            }
-
-            $post_args = [
-                'post_type'    => $this->post_type,
-                'post_status'  => isset( $item['status'] ) ? $item['status'] : 'publish',
-                'post_title'   => $post_title,
-            ];
-
-            // Insert or Update Post
-            if ( $existing_post_id > 0 ) {
-                // Update existing post
-                $post_args['ID'] = $existing_post_id;
-                $new_post_id = wp_update_post( $post_args, true );
-            } else {
-                // Create new post
-                $new_post_id = wp_insert_post( $post_args, true );
-            }
-
-            if ( is_wp_error( $new_post_id ) ) {
-                $msg = "Row $row_count: Post creation failed - " . $new_post_id->get_error_message();
-                error_log( $msg );
-                $errors[] = $msg;
-                continue;
-            }
-            
-            error_log( "Row $row_count: Post created/updated successfully. ID: $new_post_id" );
-            
-            // Log if SKU was provided
-            if ( ! empty( $sku ) ) {
-                error_log( "Row $row_count: Using SKU $sku for post $new_post_id" );
-            }
-
-            // Update or set the prod__sku
-            if ( ! empty( $sku ) ) {
-                update_field( 'prod__sku', $sku, $new_post_id );
-            }
-
-            // --- Handle Taxonomy: Product Family (Hierarchical) ---
-            // Support both old format (single column) and new format (three columns)
-            $main_category = isset( $item['main category'] ) ? trim( $item['main category'] ) : '';
-            $family = isset( $item['family'] ) ? trim( $item['family'] ) : '';
-            $sub_family = isset( $item['sub family'] ) ? trim( $item['sub family'] ) : '';
-            $sub_family_code = isset( $item['sub family code'] ) ? trim( $item['sub family code'] ) : '';
-
-            // If new format columns exist, use them
-            if ( ! empty( $main_category ) || ! empty( $family ) || ! empty( $sub_family ) ) {
-                $this->set_taxonomy_by_levels( $new_post_id, $main_category, $family, $sub_family, $sub_family_code, $this->taxonomy );
-            }
-            // Fallback to old format for backward compatibility
-            elseif ( ! empty( $item['product family'] ) ) {
-                $this->set_hierarchical_terms( $new_post_id, $item['product family'], $this->taxonomy );
-            }
-
-            // --- Handle Featured Image ---
-            if ( ! empty( $item['featured image url'] ) ) {
-                $image_url = $item['featured image url'];
-                $image_id = $this->insert_image_from_url( $image_url, $new_post_id );
-                if ( $image_id ) {
-                    set_post_thumbnail( $new_post_id, $image_id );
-                }
-            }
-
-            // --- Handle ACF Fields ---
-            foreach ( $this->acf_fields as $field ) {
-                $column_key = strtolower( $field['label'] );
-                
-                // Try multiple variations of the column name
-                $possible_keys = [
-                    $column_key,
-                    str_replace(' ', '_', $column_key),
-                    str_replace([' ', '-'], '_', $column_key),
-                    strtolower($field['name']),
-                    $field['name']
-                ];
-                
-                // Special handling for Installation vs Integrated accessories
-                if (strpos($field['label'], 'Installation') !== false) {
-                    // Also try with "Integrated" in case CSV was exported with new field names
-                    $possible_keys[] = str_replace('Installation', 'Integrated', $column_key);
-                    $possible_keys[] = str_replace('installation', 'integrated', $column_key);
-                }
-                
-                $field_value = '';
-                $found_key = '';
-                
-                // Find the value in any of the possible keys
-                foreach ($possible_keys as $key) {
-                    if (isset($item[$key]) && $item[$key] !== '') {
-                        $field_value = $item[$key];
-                        $found_key = $key;
-                        break;
-                    }
-                }
-                
-                if ($field_value !== '') {
-                    try {
-                        $this->set_acf_field_value( $new_post_id, $field, $field_value );
-                        error_log("PUK Import: Successfully imported field '{$field['name']}' from column '$found_key'");
-                    } catch ( Exception $e ) {
-                        // Continue import even if one field fails
-                        error_log( 'ACF Import Error for field ' . $field['name'] . ': ' . $e->getMessage() );
-                    }
-                } else {
-                    // Log missing fields for debugging
-                    error_log("PUK Import: Field '{$field['name']}' (label: '{$field['label']}') not found or empty in row $row_count");
-                }
-            }
-
-            $imported_count++;
+            $this->process_import_row( $item, $row_count, $errors, $imported_count );
         }
 
         fclose( $handle );
@@ -915,6 +855,124 @@ class Puk_Product_Importer_Exporter {
                 echo '</ul></div>';
             }
         });
+    }
+
+    /**
+     * AJAX: Batch import products from JSON payload
+     */
+    public function ajax_import_products_batch() {
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) error_log( 'PUK AJAX: ajax_import_products_batch initiated' );
+
+        $nonce = isset( $_REQUEST['_ajax_nonce'] ) ? $_REQUEST['_ajax_nonce'] : ( isset( $_REQUEST['nonce'] ) ? $_REQUEST['nonce'] : '' );
+        if ( ! wp_verify_nonce( $nonce, 'puk_import_nonce' ) ) {
+            wp_send_json_error( 'Security check failed' );
+        }
+        
+        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Permission denied' );
+
+        $batch_data = isset( $_POST['batch_data'] ) ? $_POST['batch_data'] : [];
+        if ( is_string( $batch_data ) ) {
+            $batch_data = json_decode( stripslashes( $batch_data ), true );
+        }
+        
+        if ( empty( $batch_data ) || ! is_array( $batch_data ) ) {
+            wp_send_json_error( 'No valid batch data provided' );
+        }
+
+        $imported_count = 0;
+        $errors = [];
+
+        foreach ( $batch_data as $index => $item ) {
+            $row_num = isset( $_POST['start_row'] ) ? intval( $_POST['start_row'] ) + $index : $index + 1;
+            $this->process_import_row( $item, $row_num, $errors, $imported_count );
+        }
+
+        wp_send_json_success( [ 
+            'imported' => $imported_count, 
+            'errors' => $errors,
+            'error_count' => count( $errors )
+        ] );
+    }
+
+    /**
+     * Process a single row from the CSV/JSON import
+     */
+    private function process_import_row( $item, $row_count, &$errors, &$imported_count ) {
+        // Prepare Post Data
+        $sku = isset( $item['sku'] ) ? trim( $item['sku'] ) : ( isset( $item['prod__sku'] ) ? trim( $item['prod__sku'] ) : '' );
+        $post_title = isset( $item['product title'] ) ? $item['product title'] : ( isset( $item['title'] ) ? $item['title'] : '' );
+
+        // Allow "0" as a title, so use strict check for empty string
+        if ( $post_title === '' ) {
+            $msg = "Row $row_count: Product Title value is empty.";
+            error_log( $msg );
+            $errors[] = $msg;
+            return false;
+        }
+
+        // Check if post exists by SKU
+        $existing_post_id = 0;
+        if ( ! empty( $sku ) ) {
+            $existing_post_id = $this->get_post_by_sku( $sku );
+        }
+
+        $post_args = [
+            'post_type'    => $this->post_type,
+            'post_status'  => isset( $item['status'] ) ? $item['status'] : 'publish',
+            'post_title'   => $post_title,
+        ];
+
+        // Insert or Update Post
+        if ( $existing_post_id > 0 ) {
+            $post_args['ID'] = $existing_post_id;
+            $new_post_id = wp_update_post( $post_args, true );
+        } else {
+            $new_post_id = wp_insert_post( $post_args, true );
+        }
+
+        if ( is_wp_error( $new_post_id ) ) {
+            $msg = "Row $row_count: Post creation failed - " . $new_post_id->get_error_message();
+            error_log( $msg );
+            $errors[] = $msg;
+            return false;
+        }
+        
+        // Log if SKU was provided
+        if ( ! empty( $sku ) ) {
+            update_field( 'prod__sku', $sku, $new_post_id );
+        }
+
+        // --- Handle Taxonomy: Product Family (Hierarchical) ---
+        $main_category = isset( $item['main category'] ) ? trim( $item['main category'] ) : '';
+        $family = isset( $item['family'] ) ? trim( $item['family'] ) : '';
+        $sub_family = isset( $item['sub family'] ) ? trim( $item['sub family'] ) : '';
+        $sub_family_code = isset( $item['sub family code'] ) ? trim( $item['sub family code'] ) : '';
+
+        if ( ! empty( $main_category ) || ! empty( $family ) || ! empty( $sub_family ) ) {
+            $this->set_taxonomy_by_levels( $new_post_id, $main_category, $family, $sub_family, $sub_family_code, $this->taxonomy );
+        } elseif ( ! empty( $item['product family'] ) ) {
+            $this->set_hierarchical_terms( $new_post_id, $item['product family'], $this->taxonomy );
+        }
+
+        // --- Handle Featured Image ---
+        if ( ! empty( $item['featured image url'] ) ) {
+            $image_url = $item['featured image url'];
+            $image_id = $this->insert_image_from_url( $image_url, $new_post_id );
+            if ( $image_id ) {
+                set_post_thumbnail( $new_post_id, $image_id );
+            }
+        }
+
+        // --- Handle ACF Fields ---
+        foreach ( $this->acf_fields as $field ) {
+            $column_key = strtolower( $field['label'] );
+            if ( isset( $item[ $column_key ] ) ) {
+                $this->set_acf_field_value( $new_post_id, $field, $item[ $column_key ] );
+            }
+        }
+
+        $imported_count++;
+        return true;
     }
 
     /**

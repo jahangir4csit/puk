@@ -76,29 +76,173 @@ class Puk_Export_Import_Admin {
 
             <!-- Export Products -->
             <h3><?php _e( 'Export Products', 'puk' ); ?></h3>
-            <p><?php _e( 'Download all products and their metadata as a CSV file.', 'puk' ); ?></p>
-            <form method="post" action="">
-                <input type="hidden" name="puk_action" value="export_products">
-                <?php wp_nonce_field( 'puk_export_nonce', '_wpnonce_export' ); ?>
-                <?php submit_button( __( 'Export All Products', 'puk' ), 'primary', 'submit_export_products' ); ?>
-            </form>
+            <p><?php _e( 'Download all products and their metadata as a CSV file (processed in batches).', 'puk' ); ?></p>
+            <div id="puk-export-progress-output" style="margin-bottom: 10px;"></div>
+            <div class="puk-progress-bar" id="puk-export-progress-wrap" style="display:none; background:#eee; border-radius:4px; height:20px; margin-bottom:10px;">
+                <div id="puk-export-progress" style="background:#0073aa; height:100%; width:0%; border-radius:4px; transition: width 0.3s;"></div>
+            </div>
+            <button type="button" class="button button-primary" id="puk-run-export"><?php _e( 'Export All Products', 'puk' ); ?></button>
 
             <!-- Import Products -->
             <h3><?php _e( 'Import Products', 'puk' ); ?></h3>
-            <p><?php _e( 'Upload a CSV file to import products. Ensure headers match exactly.', 'puk' ); ?></p>
-            <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="puk_action" value="import_products">
-                <?php wp_nonce_field( 'puk_import_nonce', '_wpnonce_import' ); ?>
+            <p><?php _e( 'Upload a CSV file to import products. (processed in batches of 30).', 'puk' ); ?></p>
+            <div id="puk-import-progress-output" style="margin-bottom: 10px;"></div>
+            <div class="puk-progress-bar" id="puk-import-progress-wrap" style="display:none; background:#eee; border-radius:4px; height:20px; margin-bottom:10px;">
+                <div id="puk-import-progress" style="background:#0073aa; height:100%; width:0%; border-radius:4px; transition: width 0.3s;"></div>
+            </div>
+            
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row"><label for="import_file"><?php _e( 'Choose CSV File', 'puk' ); ?></label></th>
+                    <td><input type="file" id="puk-import-file" accept=".csv"></td>
+                </tr>
+            </table>
+            <button type="button" class="button button-secondary" id="puk-run-import"><?php _e( 'Run Batch Import', 'puk' ); ?></button>
 
-                <table class="form-table">
-                    <tr valign="top">
-                        <th scope="row"><label for="import_file"><?php _e( 'Choose CSV File', 'puk' ); ?></label></th>
-                        <td><input type="file" name="import_file" id="import_file" accept=".csv" required></td>
-                    </tr>
-                </table>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+            <script>
+            jQuery(document).ready(function($) {
+                // Ensure ajaxurl is defined correctly
+                const puk_ajax_url = '<?php echo admin_url("admin-ajax.php"); ?>';
+                const puk_export_nonce = '<?php echo wp_create_nonce("puk_export_nonce"); ?>';
+                const puk_import_nonce = '<?php echo wp_create_nonce("puk_import_nonce"); ?>';
 
-                <?php submit_button( __( 'Run Import', 'puk' ), 'secondary', 'submit_import_products' ); ?>
-            </form>
+                // Export Logic
+                $('#puk-run-export').on('click', function() {
+                    const btn = $(this);
+                    const progressWrap = $('#puk-export-progress-wrap');
+                    const progressBar = $('#puk-export-progress');
+                    const output = $('#puk-export-progress-output');
+                    
+                    btn.prop('disabled', true);
+                    progressWrap.show();
+                    progressBar.css('width', '0%');
+                    output.html('Starting export...');
+
+                    $.post(puk_ajax_url, {
+                        action: 'puk_get_export_count',
+                        _ajax_nonce: puk_export_nonce
+                    }, function(response) {
+                        if (response.success) {
+                            const total = response.data.total;
+                            const headers = response.data.headers;
+                            let offset = 0;
+                            let allRows = [];
+
+                            function fetchBatch() {
+                                output.html(`Fetching products ${offset} to ${Math.min(offset + 20, total)} of ${total}...`);
+                                $.post(puk_ajax_url, {
+                                    action: 'puk_export_products_batch',
+                                    offset: offset,
+                                    _ajax_nonce: puk_export_nonce
+                                }, function(res) {
+                                    if (res.success) {
+                                        allRows = allRows.concat(res.data.rows);
+                                        offset += 20;
+                                        const percent = Math.min((offset / total) * 100, 100);
+                                        progressBar.css('width', percent + '%');
+
+                                        if (offset < total) {
+                                            fetchBatch();
+                                        } else {
+                                            output.html('Generating CSV...');
+                                            const csv = Papa.unparse({
+                                                fields: headers,
+                                                data: allRows
+                                            });
+                                            const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+                                            const link = document.createElement("a");
+                                            const url = URL.createObjectURL(blob);
+                                            link.setAttribute("href", url);
+                                            link.setAttribute("download", `product-export-${new Date().toISOString().split('T')[0]}.csv`);
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            document.body.removeChild(link);
+                                            output.html('Export complete!');
+                                            btn.prop('disabled', false);
+                                        }
+                                    } else {
+                                        output.html('<span style="color:red">Error: ' + res.data + '</span>');
+                                        btn.prop('disabled', false);
+                                    }
+                                });
+                            }
+                            fetchBatch();
+                        } else {
+                            output.html('<span style="color:red">Error: ' + response.data + '</span>');
+                            btn.prop('disabled', false);
+                        }
+                    });
+                });
+
+                // Import Logic
+                $('#puk-run-import').on('click', function() {
+                    const fileInput = $('#puk-import-file')[0];
+                    if (!fileInput.files.length) {
+                        alert('Please select a CSV file.');
+                        return;
+                    }
+
+                    const btn = $(this);
+                    const progressWrap = $('#puk-import-progress-wrap');
+                    const progressBar = $('#puk-import-progress');
+                    const output = $('#puk-import-progress-output');
+                    
+                    btn.prop('disabled', true);
+                    progressWrap.show();
+                    progressBar.css('width', '0%');
+                    output.html('Parsing CSV...');
+
+                    Papa.parse(fileInput.files[0], {
+                        header: true,
+                        skipEmptyLines: true,
+                        transformHeader: function(h) {
+                            return h.trim().toLowerCase();
+                        },
+                        complete: function(results) {
+                            const data = results.data;
+                            const total = data.length;
+                            let index = 0;
+                            const batchSize = 20;
+
+                            function sendBatch() {
+                                const chunk = data.slice(index, index + batchSize);
+                                output.html(`Importing rows ${index + 1} to ${Math.min(index + batchSize, total)} of ${total}...`);
+                                
+                                $.post(puk_ajax_url, {
+                                    action: 'puk_import_products_batch',
+                                    batch_data: JSON.stringify(chunk),
+                                    start_row: index + 1,
+                                    _ajax_nonce: puk_import_nonce
+                                }, function(res) {
+                                    if (res.success) {
+                                        index += batchSize;
+                                        const percent = Math.min((index / total) * 100, 100);
+                                        progressBar.css('width', percent + '%');
+
+                                        if (index < total) {
+                                            sendBatch();
+                                        } else {
+                                            output.html('Import complete!');
+                                            btn.prop('disabled', false);
+                                            alert('Import finished successfully.');
+                                        }
+                                    } else {
+                                        output.html('<span style="color:red">Error: ' + res.data + '</span>');
+                                        btn.prop('disabled', false);
+                                    }
+                                });
+                            }
+                            sendBatch();
+                        },
+                        error: function(err) {
+                            output.html('<span style="color:red">CSV Parse Error: ' + err.message + '</span>');
+                            btn.prop('disabled', false);
+                        }
+                    });
+                });
+            });
+            </script>
         </div>
 
         <!-- Products Family Taxonomy Section -->
