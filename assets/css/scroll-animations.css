@@ -1,0 +1,89 @@
+/* Scroll Animations CSS */
+.gs-reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: none;
+    /* Let GSAP handle it */
+}
+
+.gs-reveal-left {
+    opacity: 0;
+    transform: translateX(-40px);
+}
+
+.gs-reveal-right {
+    opacity: 0;
+    transform: translateX(40px);
+}
+
+.gs-scale-image-wrap {
+    overflow: hidden;
+}
+
+.gs-scale-image {
+    transform: scale(1.1);
+}
+
+.gs-grow-image {
+    opacity: 0;
+    transform: scale(0.2);
+    will-change: transform, opacity;
+}
+
+.gs-split-reveal-wrap {
+    position: relative;
+    overflow: hidden;
+    clip-path: inset(50% 0 0% 0);
+    /* Start at 50% height from bottom */
+    opacity: 0;
+    will-change: clip-path, opacity;
+}
+
+.intro-card-media-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.intro-card-media-wrap.overflow-hidden {
+    overflow: hidden;
+}
+
+.gs-project-slide-image {
+    will-change: transform;
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.intro-section .gs-link-reveal {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+
+
+.gs-stagger-item {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+/* Specific adjustments for home page elements */
+#home-page section {
+    position: relative;
+    overflow: hidden;
+    /* Prevent scrollbar issues during animations */
+}
+
+/* Merge Animation */
+.gs-merge-reveal {
+    display: flex;
+    gap: 0.3em;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.gs-merge-reveal span {
+    display: inline-block;
+    will-change: transform, opacity;
+}

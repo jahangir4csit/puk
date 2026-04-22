@@ -1,0 +1,31 @@
+  <section class="sabbia-section">
+        <div class="container">
+            <!-- Title -->
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-12">
+                </div>
+                <div class="col-lg-8 col-md-8 col-12">
+                    <h2 class="section-title">SABBIA</h2>
+                    <div class="section-description">
+                        <p>An endless expanse of particles shaped by time, caressed by the wind, and sculpted by nature. 
+                        A motionless sea that ripples under the sun, reflects its light, and whispers ancient tales of wild, 
+                        untamed landscapes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images -->
+            <div class="row g-4">
+                <div class="col-lg-6 col-md-6 col-12">
+                    <div class="image-container">
+                        <img src="https://puk.dominiotest.ch/wp-content/uploads/2025/12/PukCava10_2417788-1.jpg" alt="">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-12">
+                    <div class="image-container">
+                        <img src="https://puk.dominiotest.ch/wp-content/uploads/2025/12/PukCava10_2417314-1-1.jpg" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>

@@ -1,0 +1,92 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                     IMAGE ASSIGNMENT QUICK REFERENCE                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 1. HIERARCHICAL TAXONOMY (Parent → Child)                                    │
+└──────────────────────────────────────────────────────────────────────────────┘
+   Format: fam__[ParentFamily]__[SubFamily]__[Suffix].ext
+   
+   Examples:
+   ✓ fam__qubo__micro-hp__main.webp
+   ✓ fam__qubo__micro-hp__tech.webp
+   ✓ fam__qubo__micro-hp__hover.webp
+   ✓ fam__qubo__micro-hp__gallery-1.webp
+   
+   Multiple sub-families (same image for all):
+   ✓ fam__qubo__maxi-hp|maxi-cob__main.webp
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 2. SUB-FAMILY BY CODE (Match by family_code meta field)                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+   Format: sf__[SubFamilyName]__[FamilyCode]__[Suffix].ext
+   
+   Examples:
+   ✓ sf__micro-hp__101601__tech.webp
+   ✓ sf__micro-hp__101601__main.webp
+   ✓ sf__micro-hp__101601__gallery-1.webp
+   
+   Product galleries (all products in sub-family):
+   ✓ sf__micro-hp__101601__gallery2-1.webp  → pro_gallary
+   ✓ sf__micro-hp__101601__gallery3-1.webp  → pro_sub_gallary
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 3. ACCESSORIES                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+   Format: acc__[AccessoryCode].ext
+   
+   Examples:
+   ✓ acc__AC044.webp
+   ✓ acc__AC123.webp
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 4. PRODUCTS (By SKU)                                                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+   Format: [SKU]__[FieldName].ext
+   
+   Examples:
+   ✓ SKU123__pro_main_img.webp
+   ✓ SKU123___thumbnail_id.webp  → Featured image
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ FIELD SUFFIXES                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+   main       → pf_fet_img (Main/Featured image)
+   hover      → pf_hover_img (Hover state)
+   tech       → pf_subfam_tech_drawing (Technical drawing)
+   designer   → pf_designed_by (Designer image)
+   gallery    → pf_subfam_product_image (Gallery - appends)
+   gallery-1  → pf_subfam_product_image (Gallery - appends)
+   gallery2-* → pro_gallary (Product gallery - all products)
+   gallery3-* → pro_sub_gallary (Product sub-gallery - all products)
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ COMMON MISTAKES                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+   ✗ sf__qubo__micro-hp__101601__tech.webp  (Too many parts!)
+      → Use: fam__qubo__micro-hp__tech.webp
+      → Or:  sf__micro-hp__101601__tech.webp
+   
+   ✗ fam__micro-hp__tech.webp  (Missing parent family!)
+      → Use: fam__qubo__micro-hp__tech.webp
+   
+   ✗ sf__micro-hp__tech.webp  (Missing family code!)
+      → Use: sf__micro-hp__101601__tech.webp
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ YOUR CURRENT ERROR                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+   File: sf__qubo__micro-hp__101601__tech.webp
+   
+   Problem: 5 parts detected (sf | qubo | micro-hp | 101601 | tech)
+   Expected: 4 parts
+   
+   ✓ SOLUTION 1 (Hierarchical):
+     Rename to: fam__qubo__micro-hp__tech.webp
+     
+   ✓ SOLUTION 2 (By Code):
+     Rename to: sf__micro-hp__101601__tech.webp
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ TIP: All formats use double underscores (__) as separators                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝

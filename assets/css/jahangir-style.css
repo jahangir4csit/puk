@@ -1,0 +1,17 @@
+.tax_archive_wrap{
+    padding-top: 114px;
+}
+.tax_header_info{
+        gap: 36px;
+    }
+.tax_header_info .title-box{
+    min-width: 300px;
+}
+@media screen and (min-width: 1280px) {
+    .tax_header_info{
+        gap: 50px;
+    }
+    .tax_header_info .description-box{
+        max-width: 62%;
+    }
+}
